@@ -76,12 +76,14 @@ object EntityActionExecutor {
         return when (press) {
             PressType.SINGLE -> when {
                 domain == "camera" -> DefaultAct.CAMERA_PIP
-                domain == "light" && isSimpleLight -> DefaultAct.TOGGLE
+                // Lights toggle on OK like a wall switch; brightness is adjusted directly
+                // with the D-pad and the extra controls live behind long-press (EXPAND).
+                domain == "light" -> DefaultAct.TOGGLE
                 domain == "automation" -> {
                     val action = entity.lastKnownState["automation_action"] as? String ?: "trigger"
                     if (action == "trigger") DefaultAct.TRIGGER else DefaultAct.TOGGLE
                 }
-                domain in listOf("climate","fan","cover","lock","alarm_control_panel","light") -> DefaultAct.EXPAND
+                domain in listOf("climate","fan","cover","lock","alarm_control_panel") -> DefaultAct.EXPAND
                 domain in listOf("switch","input_boolean", "media_player") -> DefaultAct.TOGGLE
                 domain in listOf("button","input_button") -> DefaultAct.PRESS
                 domain in listOf("script","scene") -> DefaultAct.TURN_ON
@@ -90,7 +92,8 @@ object EntityActionExecutor {
             PressType.LONG -> when {
                 domain == "camera" || domain == "automation" -> DefaultAct.NONE
                 domain == "light" && isSimpleLight -> DefaultAct.NONE
-                domain in listOf("climate","fan","cover","lock","light") -> DefaultAct.TOGGLE
+                domain == "light" -> DefaultAct.EXPAND
+                domain in listOf("climate","fan","cover","lock") -> DefaultAct.TOGGLE
                 else -> DefaultAct.NONE
             }
             PressType.DOUBLE -> DefaultAct.NONE

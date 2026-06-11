@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import dev.trooped.tvquickbars.data.EntityItem
 import dev.trooped.tvquickbars.ha.HomeAssistantClient
 import dev.trooped.tvquickbars.ui.QuickBar.overlay.LocalListState
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.BarAdjustAxis
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.LocalBarAdjustAxis
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.getEntityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -96,7 +98,8 @@ fun EntityList(
 
         CompositionLocalProvider(
             LocalBringIntoViewSpec provides bringIntoViewSpec,
-            LocalListState provides listState
+            LocalListState provides listState,
+            LocalBarAdjustAxis provides BarAdjustAxis.VERTICAL
         ) {
             Box(
                 modifier = modifier
@@ -135,7 +138,8 @@ fun EntityList(
 
         CompositionLocalProvider(
             LocalBringIntoViewSpec provides bringIntoViewSpec,
-            LocalListState provides gridState
+            LocalListState provides gridState,
+            LocalBarAdjustAxis provides BarAdjustAxis.NONE
         ) {
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),
@@ -174,7 +178,8 @@ fun EntityList(
 
         CompositionLocalProvider(
             LocalBringIntoViewSpec provides bringIntoViewSpec,
-            LocalListState provides listState
+            LocalListState provides listState,
+            LocalBarAdjustAxis provides BarAdjustAxis.HORIZONTAL
         ) {
             LazyColumn(
                 state = listState,
