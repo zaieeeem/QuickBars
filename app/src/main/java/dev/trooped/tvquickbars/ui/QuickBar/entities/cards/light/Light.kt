@@ -4,20 +4,13 @@ import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,32 +18,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -61,19 +44,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.trooped.tvquickbars.R
@@ -82,15 +62,16 @@ import dev.trooped.tvquickbars.data.PressType
 import dev.trooped.tvquickbars.data.computeLightCaps
 import dev.trooped.tvquickbars.ha.HomeAssistantClient
 import dev.trooped.tvquickbars.persistence.SavedEntitiesManager
-import dev.trooped.tvquickbars.ui.AnimatedIconButton
 import dev.trooped.tvquickbars.ui.EntityIconMapper
 import dev.trooped.tvquickbars.ui.QuickBar.controls.PowerButton
 import dev.trooped.tvquickbars.ui.QuickBar.entities.cards.normal.EntityCard
-import dev.trooped.tvquickbars.ui.QuickBar.foundation.AlphaLow
-import dev.trooped.tvquickbars.ui.QuickBar.foundation.AlphaMedium
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.BarAdjustAxis
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.LocalBarAdjustAxis
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.OverlayBackDispatcher
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.SafePainterResource
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.dpadAdjust
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.getTypeSafe
-import dev.trooped.tvquickbars.ui.ValuePill
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.tvFocusFrame
 import dev.trooped.tvquickbars.utils.EntityActionExecutor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -180,7 +161,7 @@ fun <T> rememberDebouncedAction(
  *
  * This function handles the logic for extracting and calculating light-specific properties from
  * the entity's attributes, such as brightness percentage, color temperature (Kelvin),
- * and RGB color values. It also determines which control tabs (Brightness, Temperature, Color)
+ * and RGB color values. It also determines which control rows (Brightness, Temperature, Color)
  * should be visible based on the entity's capabilities and user preferences.
  *
  * @param entity The [EntityItem] representing the light.
@@ -268,25 +249,12 @@ fun rememberLightUiState(entity: EntityItem, isOn: Boolean, supportsColorTemp: B
 /**
  * A specialized card component for Home Assistant light entities.
  *
- * This card provides a rich interface for controlling lights, supporting:
- * - Simple toggle actions for basic lights.
- * - Expanded controls for brightness, color temperature (Kelvin), and RGB color selection.
- * - Adaptive UI that scales based on the entity's capabilities (capabilities are computed via [computeLightCaps]).
- * - Visual indicators for the current light color and brightness percentage.
- * - Dynamic theming based on the light's state and user-defined color preferences.
- * - Focus management and accessibility support for Android TV navigation.
- *
- * If the light is "simple" (no extra features enabled or supported), it delegates rendering
- * to a standard [EntityCard]. Otherwise, it provides an expandable interface with tabbed
- * controls for advanced adjustments.
- *
- * @param entity The [EntityItem] representing the light and its current state/attributes.
- * @param haClient The [HomeAssistantClient] used to dispatch service calls (turn_on, turn_off, etc.).
- * @param onStateColor The theme color key to use when the light is on.
- * @param customOnStateColor An optional list of RGB values if [onStateColor] is set to "custom".
- * @param modifier The [Modifier] to be applied to the card's layout.
- * @param isHorizontal Determines if the card should use a wide, horizontal layout or a standard vertical one.
- * @param isEntityInitialized Whether the entity data has been fully loaded and is ready for interaction.
+ * Simple on/off lights delegate to a standard [EntityCard]. Dimmable lights render as a
+ * direct-manipulation tile:
+ * - OK toggles the light, D-pad left/right (up/down in horizontal bars) adjusts brightness
+ *   directly while the tile is focused — the tile background fills to show the level.
+ * - Long-press expands the tile in place with rows for brightness, warmth, and color;
+ *   up/down moves between rows, left/right adjusts, BACK collapses.
  */
 @Composable
 fun LightEntityCard(
@@ -321,520 +289,85 @@ fun LightEntityCard(
             isEntityInitialized = isEntityInitialized
         )
     } else {
-        var expanded by remember { mutableStateOf(false) }
-        val cardFocusRequester = remember { FocusRequester() }
-        val closeBtnFocusRequester = remember { FocusRequester() }
-        val wasCardFocused = remember { mutableStateOf(false) }
-        val interactionSource = remember { MutableInteractionSource() }
-        val isFocused by interactionSource.collectIsFocusedAsState()
-        val bringIntoViewRequester = remember { BringIntoViewRequester() }
-
-        LaunchedEffect(isFocused) {
-            if (isFocused) wasCardFocused.value = true
-        }
-
-        val isOn = entity.state == "on"
-        val isEnabled = entity.state !in listOf("unavailable", "unknown")
-        
-        val uiState = rememberLightUiState(
-            entity = entity, 
-            isOn = isOn, 
-            supportsColorTemp = caps.colorTemp, 
+        LightTile(
+            entity = entity,
+            haClient = haClient,
+            onStateColor = onStateColor,
+            customOnStateColor = customOnStateColor,
+            modifier = modifier,
+            isHorizontal = isHorizontal,
+            isEntityInitialized = isEntityInitialized,
+            supportsBrightness = caps.brightness,
+            supportsColorTemp = caps.colorTemp,
             supportsRgbColor = caps.color
         )
-
-        var isPressed by remember { mutableStateOf(false) }
-        LaunchedEffect(interactionSource) {
-            interactionSource.interactions.collect { interaction ->
-                when (interaction) {
-                    is PressInteraction.Press -> isPressed = true
-                    is PressInteraction.Release, is PressInteraction.Cancel -> isPressed = false
-                }
-            }
-        }
-
-        val iconScale by animateFloatAsState(
-            targetValue = if (isPressed) 1.2f else 1.0f,
-            animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium),
-            label = "iconPressAnim"
-        )
-
-        LaunchedEffect(expanded) {
-            if (expanded) {
-                wasCardFocused.value = isFocused
-                delay(50)
-                bringIntoViewRequester.bringIntoView()
-                delay(100)
-                withContext(Dispatchers.Main.immediate) {
-                    try { closeBtnFocusRequester.requestFocus() } catch (e: Exception) { Log.e("LightEntityCard", "Focus request failed", e) }
-                }
-            } else if (wasCardFocused.value) {
-                delay(100)
-                withContext(Dispatchers.Main.immediate) {
-                    try {
-                        cardFocusRequester.requestFocus()
-                        wasCardFocused.value = false
-                    } catch (e: Exception) { Log.e("LightEntityCard", "Focus request failed", e) }
-                }
-            }
-        }
-
-        val iconRes = remember(entity.id, entity.state, entity.customIconOnName, entity.customIconOffName) {
-            EntityIconMapper.getFinalIconForEntity(entity) ?: R.drawable.ic_default
-        }
-
-        val onBackgroundColor = when {
-            onStateColor.equals("custom", ignoreCase = true) && customOnStateColor != null && customOnStateColor.size >= 3 -> {
-                Color(android.graphics.Color.rgb(customOnStateColor[0].coerceIn(0, 255), customOnStateColor[1].coerceIn(0, 255), customOnStateColor[2].coerceIn(0, 255)))
-            }
-            onStateColor == "colorAmber500" -> colorResource(id = R.color.md_theme_Amber500)
-            onStateColor == "colorTertiary" -> colorResource(id = R.color.md_theme_tertiary)
-            onStateColor == "colorError"    -> colorResource(id = R.color.md_theme_error)
-            else                            -> colorResource(id = R.color.md_theme_primary)
-        }
-
-        fun contentFor(bg: Color): Color {
-            val luma = 0.299f*bg.red + 0.587f*bg.green + 0.114f*bg.blue
-            return if (luma > 0.6f) Color.Black else Color.White
-        }
-
-        val onContentColor = when {
-            onStateColor.equals("custom", true) && customOnStateColor != null && customOnStateColor.size >= 3 -> contentFor(onBackgroundColor)
-            onStateColor == "colorAmber500" -> Color.Black
-            onStateColor == "colorTertiary" -> colorResource(id = R.color.md_theme_onTertiary)
-            onStateColor == "colorError"    -> colorResource(id = R.color.md_theme_onError)
-            else                            -> colorResource(id = R.color.md_theme_onPrimary)
-        }
-
-        val offBackgroundColor = colorResource(id = R.color.md_theme_surfaceVariant)
-        val offContentColor    = colorResource(id = R.color.md_theme_onSurface)
-        val disabledBackground = offBackgroundColor
-        val disabledContent    = offContentColor.copy(alpha = 0.2f)
-
-        val animatedBackgroundColor by animateColorAsState(
-            targetValue = when {
-                !isEnabled -> disabledBackground
-                isOn       -> onBackgroundColor
-                else       -> offBackgroundColor
-            },
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-            label = "lightBackgroundColor"
-        )
-
-        val animatedContentColor by animateColorAsState(
-            targetValue = when {
-                !isEnabled -> disabledContent
-                isOn       -> onContentColor
-                else       -> offContentColor
-            },
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-            label = "lightContentColor"
-        )
-
-        val savedEntitiesManager = remember { SavedEntitiesManager(context) }
-        val handlePress: (PressType) -> Unit = remember(entity.id, haClient, savedEntitiesManager, isEntityInitialized) {
-            { press ->
-                if (isEntityInitialized) {
-                    EntityActionExecutor.perform(
-                        entity = entity,
-                        press = press,
-                        haClient = haClient,
-                        savedEntitiesManager = savedEntitiesManager,
-                        onExpand = { expanded = true }
-                    )
-                }
-            }
-        }
-
-        Card(
-            modifier = modifier
-                .focusRequester(cardFocusRequester)
-                .combinedClickable(
-                    enabled = !expanded && isEnabled,
-                    interactionSource = interactionSource,
-                    indication = ripple(bounded = true, color = animatedContentColor),
-                    onClick = { handlePress(PressType.SINGLE) },
-                    onLongClick = { handlePress(PressType.LONG) }
-                )
-                .focusable(enabled = !expanded, interactionSource = interactionSource)
-                .bringIntoViewRequester(bringIntoViewRequester),
-            shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(
-                width = if (isFocused && !expanded) 3.dp else 0.dp,
-                color = if (isFocused && !expanded) Color.White else Color.Transparent
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = animatedBackgroundColor,
-                contentColor = animatedContentColor
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .animateContentSize(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing))
-                    .fillMaxSize()
-            ) {
-                key(expanded) {
-                    if (!isHorizontal) {
-                        VerticalLightContent(
-                            entity = entity,
-                            uiState = uiState,
-                            haClient = haClient,
-                            expanded = expanded,
-                            onClose = { expanded = false },
-                            iconRes = iconRes,
-                            contentColor = animatedContentColor,
-                            backgroundColor = animatedBackgroundColor,
-                            closeBtnFocusRequester = closeBtnFocusRequester,
-                            iconModifier = Modifier.scale(iconScale)
-                        )
-                    } else {
-                        HorizontalLightContent(
-                            entity = entity,
-                            uiState = uiState,
-                            haClient = haClient,
-                            expanded = expanded,
-                            onClose = { expanded = false },
-                            iconRes = iconRes,
-                            contentColor = animatedContentColor,
-                            backgroundColor = animatedBackgroundColor,
-                            closeBtnFocusRequester = closeBtnFocusRequester,
-                            iconModifier = Modifier.scale(iconScale)
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
-/**
- * A composable that provides a tabbed interface for controlling light attributes.
- *
- * Depending on the [uiState] and [selectedTab], this section displays controls for:
- * - Brightness (Percentage adjustment)
- * - Color Temperature (Kelvin adjustment)
- * - RGB Color (Color selection)
- */
+private const val BrightnessStepPercent = 5
+private val TileShape = RoundedCornerShape(16.dp)
+private val ControlRowShape = RoundedCornerShape(12.dp)
+
 @Composable
-private fun LightControlsSection(
+private fun LightTile(
     entity: EntityItem,
     haClient: HomeAssistantClient?,
-    uiState: LightUiState,
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit,
-    contentColor: Color,
-    backgroundColor: Color,
-    modifier: Modifier = Modifier,
-    isCompact: Boolean = false
+    onStateColor: String,
+    customOnStateColor: List<Int>?,
+    modifier: Modifier,
+    isHorizontal: Boolean,
+    isEntityInitialized: Boolean,
+    supportsBrightness: Boolean,
+    supportsColorTemp: Boolean,
+    supportsRgbColor: Boolean
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (uiState.tabLabels.size > 1) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(if (isCompact) 0.9f else 1f)
-                    .horizontalScroll(rememberScrollState())
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                uiState.tabLabels.forEachIndexed { index, label ->
-                    val isSelected = selectedTab == index
-                    val tabInteraction = remember { MutableInteractionSource() }
-                    val tabFocused by tabInteraction.collectIsFocusedAsState()
+    val context = LocalContext.current
+    val adjustAxis = LocalBarAdjustAxis.current
+    var expanded by remember { mutableStateOf(false) }
+    val cardFocusRequester = remember { FocusRequester() }
+    val firstRowFocusRequester = remember { FocusRequester() }
+    val wasCardFocused = remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                when {
-                                    tabFocused -> contentColor
-                                    isSelected -> contentColor.copy(alpha = 0.2f)
-                                    else -> contentColor.copy(alpha = 0.05f)
-                                }
-                            )
-                            .border(
-                                width = if (isSelected) 2.dp else 1.dp,
-                                color = if (tabFocused) contentColor else contentColor.copy(alpha = if (isSelected) 0.8f else 0.3f),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .clickable(
-                                interactionSource = tabInteraction,
-                                indication = ripple(),
-                                onClick = { onTabSelected(index) }
-                            )
-                            .focusable(interactionSource = tabInteraction)
-                            .padding(horizontal = if (isCompact) 8.dp else 12.dp, vertical = if (isCompact) 4.dp else 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = label,
-                            fontSize = if (isCompact) 11.sp else 12.sp,
-                            color = if (tabFocused) backgroundColor else contentColor,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
-                }
-            }
-        }
-
-        when {
-            uiState.tabLabels.isNotEmpty() && selectedTab < uiState.tabLabels.size && uiState.tabLabels[selectedTab] == "Brightness" -> {
-                BrightnessControl(entity, uiState.brightnessPercent, haClient, contentColor, backgroundColor, isCompact)
-            }
-            uiState.tabLabels.isNotEmpty() && selectedTab < uiState.tabLabels.size && uiState.tabLabels[selectedTab] == "Temperature" -> {
-                ColorTempControl(entity, uiState.currentKelvin, uiState.minKelvin, uiState.maxKelvin, haClient, contentColor, backgroundColor, isCompact)
-            }
-            uiState.tabLabels.isNotEmpty() && selectedTab < uiState.tabLabels.size && uiState.tabLabels[selectedTab] == "Color" -> {
-                RgbColorControl(entity, uiState.rgbColor, haClient, contentColor, backgroundColor, isCompact)
-            }
-        }
+    LaunchedEffect(isFocused) {
+        if (isFocused) wasCardFocused.value = true
     }
-}
 
-@Composable
-private fun VerticalLightContent(
-    entity: EntityItem,
-    uiState: LightUiState,
-    haClient: HomeAssistantClient?,
-    expanded: Boolean,
-    onClose: () -> Unit,
-    iconRes: Int,
-    contentColor: Color,
-    backgroundColor: Color,
-    closeBtnFocusRequester: FocusRequester,
-    iconModifier: Modifier
-) {
-    var selectedTab by remember { mutableStateOf(0) }
+    val isOn = entity.state == "on"
+    val isEnabled = entity.state !in listOf("unavailable", "unknown")
 
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = SafePainterResource(id = iconRes),
-            contentDescription = uiState.name,
-            modifier = Modifier.size(28.dp).then(iconModifier),
-            colorFilter = ColorFilter.tint(contentColor)
-        )
-
-        Text(
-            text = uiState.name,
-            fontSize = 12.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(vertical = 2.dp)
-        )
-
-        if (uiState.isOn) {
-            if (uiState.indicatorColor != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "${uiState.brightnessPercent}%", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    ColorDot(color = uiState.indicatorColor, outline = contentColor, size = 16.dp)
-                }
-            } else {
-                Text(text = "${uiState.brightnessPercent}%", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-
-        if (expanded) {
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, color = contentColor.copy(alpha = 0.2f))
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LightControlsSection(
-                entity = entity,
-                haClient = haClient,
-                uiState = uiState,
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
-                contentColor = contentColor,
-                backgroundColor = backgroundColor
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            PowerButton(
-                isOn = uiState.isOn,
-                onClick = { haClient?.callService("light", if (uiState.isOn) "turn_off" else "turn_on", entity.id) },
-                contentColor = contentColor,
-                backgroundColor = backgroundColor
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-            val closeBtnInteraction = remember { MutableInteractionSource() }
-            val closeIsFocused by closeBtnInteraction.collectIsFocusedAsState()
-            
-            Box(
-                modifier = Modifier
-                    .focusRequester(closeBtnFocusRequester)
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(if (closeIsFocused) contentColor else contentColor.copy(alpha = AlphaLow))
-                    .border(width = if (closeIsFocused) 2.dp else 1.dp, color = if (closeIsFocused) contentColor else contentColor.copy(alpha = AlphaMedium), shape = CircleShape)
-                    .clickable(interactionSource = closeBtnInteraction, indication = ripple(), onClick = onClose)
-                    .focusable(interactionSource = closeBtnInteraction)
-                    .align(Alignment.CenterHorizontally),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = if (closeIsFocused) backgroundColor else contentColor, modifier = Modifier.size(24.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun HorizontalLightContent(
-    entity: EntityItem,
-    uiState: LightUiState,
-    haClient: HomeAssistantClient?,
-    expanded: Boolean,
-    onClose: () -> Unit,
-    iconRes: Int,
-    contentColor: Color,
-    backgroundColor: Color,
-    closeBtnFocusRequester: FocusRequester,
-    iconModifier: Modifier
-) {
-    var selectedTab by remember { mutableStateOf(0) }
-
-    Row(
-        modifier = Modifier
-            .height(160.dp)
-            .then(if (expanded) Modifier.width(360.dp) else Modifier.width(120.dp))
-            .clip(RoundedCornerShape(8.dp))
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Column(
-            modifier = Modifier.width(104.dp).fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = SafePainterResource(id = iconRes),
-                contentDescription = uiState.name,
-                modifier = Modifier.size(28.dp).then(iconModifier),
-                colorFilter = ColorFilter.tint(contentColor)
-            )
-            Text(
-                text = uiState.name,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
-
-            if (uiState.isOn) {
-                if (uiState.indicatorColor != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "${uiState.brightnessPercent}%", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        ColorDot(color = uiState.indicatorColor, outline = contentColor, size = 16.dp)
-                    }
-                } else {
-                    Text(text = "${uiState.brightnessPercent}%", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-
-        if (expanded) {
-            Box(modifier = Modifier.width(1.dp).height(100.dp).background(contentColor.copy(alpha = 0.2f)))
-
-            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                LightControlsSection(
-                    entity = entity,
-                    haClient = haClient,
-                    uiState = uiState,
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it },
-                    contentColor = contentColor,
-                    backgroundColor = backgroundColor,
-                    modifier = Modifier.fillMaxSize().padding(end = 32.dp),
-                    isCompact = true
-                )
-
-                Column(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val closeBtnInteraction = remember { MutableInteractionSource() }
-                    val closeIsFocused by closeBtnInteraction.collectIsFocusedAsState()
-                    Box(
-                        modifier = Modifier
-                            .focusRequester(closeBtnFocusRequester)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(if (closeIsFocused) contentColor else contentColor.copy(alpha = AlphaLow))
-                            .border(width = if (closeIsFocused) 2.dp else 1.dp, color = if (closeIsFocused) contentColor else contentColor.copy(alpha = AlphaMedium), shape = CircleShape)
-                            .clickable(interactionSource = closeBtnInteraction, indication = ripple(), onClick = onClose)
-                            .focusable(interactionSource = closeBtnInteraction),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = if (closeIsFocused) backgroundColor else contentColor, modifier = Modifier.size(20.dp))
-                    }
-
-                    PowerButton(
-                        isOn = uiState.isOn,
-                        onClick = { haClient?.callService("light", if (uiState.isOn) "turn_off" else "turn_on", entity.id) },
-                        contentColor = contentColor,
-                        backgroundColor = backgroundColor,
-                        size = 36.dp
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * A small circular visual indicator used to display the current color or temperature of a light.
- */
-@Composable
-private fun ColorDot(color: Color?, outline: Color, size: Dp = 16.dp) {
-    val dot = color ?: Color.Transparent
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(dot)
-            .border(1.dp, outline.copy(alpha = 0.6f), CircleShape)
+    val uiState = rememberLightUiState(
+        entity = entity,
+        isOn = isOn,
+        supportsColorTemp = supportsColorTemp,
+        supportsRgbColor = supportsRgbColor
     )
-}
 
-/**
- * A UI component for controlling the brightness level of a light entity.
- *
- * This control provides a debounced interface for adjusting brightness using increment (plus)
- * and decrement (minus) buttons. It synchronizes the local state with Home Assistant by
- * calling the `light.turn_on` service with the `brightness_pct` attribute. If the brightness
- * is set to 0%, it automatically triggers the `light.turn_off` service.
- */
-@Composable
-private fun BrightnessControl(
-    entity: EntityItem,
-    brightnessPercent: Int,
-    haClient: HomeAssistantClient?,
-    contentColor: Color,
-    backgroundColor: Color,
-    isCompact: Boolean = false
-) {
+    val accentColor = when {
+        onStateColor.equals("custom", ignoreCase = true) && customOnStateColor != null && customOnStateColor.size >= 3 -> {
+            Color(android.graphics.Color.rgb(customOnStateColor[0].coerceIn(0, 255), customOnStateColor[1].coerceIn(0, 255), customOnStateColor[2].coerceIn(0, 255)))
+        }
+        onStateColor == "colorAmber500" -> colorResource(id = R.color.md_theme_Amber500)
+        onStateColor == "colorTertiary" -> colorResource(id = R.color.md_theme_tertiary)
+        onStateColor == "colorError"    -> colorResource(id = R.color.md_theme_error)
+        else                            -> colorResource(id = R.color.md_theme_primary)
+    }
+    val accentContentColor = lightContentFor(accentColor)
+
+    val surfaceColor = colorResource(id = R.color.md_theme_surfaceVariant)
+    val onSurfaceColor = colorResource(id = R.color.md_theme_onSurface)
+    val contentColor = if (isEnabled) onSurfaceColor else onSurfaceColor.copy(alpha = 0.4f)
+
+    val animatedContentColor by animateColorAsState(
+        targetValue = contentColor,
+        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        label = "lightContentColor"
+    )
+
     val (localBrightness, setLocalBrightness) = rememberDebouncedAction(
-        initialValue = brightnessPercent,
+        initialValue = uiState.brightnessPercent,
         onSend = { v ->
             if (haClient == null) return@rememberDebouncedAction
             if (v <= 0) {
@@ -845,134 +378,479 @@ private fun BrightnessControl(
             }
         }
     )
-
-    val step = 10
-    fun applyDelta(delta: Int) {
-        val next = (localBrightness + delta).coerceIn(0, 100)
+    val adjustBrightness: (Int) -> Unit = { direction ->
+        val next = (localBrightness + direction * BrightnessStepPercent).coerceIn(0, 100)
         if (next != localBrightness) setLocalBrightness(next)
     }
 
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AnimatedIconButton(
-                icon = Icons.Filled.Remove, contentDescription = "Dim", onClick = { applyDelta(-step) },
-                contentColor = contentColor, backgroundColor = backgroundColor, size = if (isCompact) 36.dp else 40.dp
-            )
-            ValuePill(
-                text = "$localBrightness%", contentColor = contentColor, backgroundColor = backgroundColor,
-                minWidth = if (isCompact) 50.dp else 60.dp, height = if (isCompact) 36.dp else 40.dp
-            )
-            AnimatedIconButton(
-                icon = Icons.Filled.Add, contentDescription = "Brighten", onClick = { applyDelta(+step) },
-                contentColor = contentColor, backgroundColor = backgroundColor, size = if (isCompact) 36.dp else 40.dp
-            )
-        }
-    }
-}
+    val showBrightnessRow = supportsBrightness && "Brightness" in uiState.tabLabels
+    val showWarmthRow = "Temperature" in uiState.tabLabels
+    val showColorRow = "Color" in uiState.tabLabels
 
-/**
- * A UI component for controlling the color temperature (Kelvin) of a light entity.
- *
- * This control allows users to adjust the warmth or coolness of a light using increment and
- * decrement buttons. It utilizes [rememberDebouncedAction] to ensure that Home Assistant
- * service calls are only dispatched after the user has finished their selection, preventing
- * network congestion.
- *
- * The component calculates a percentage representation of the current Kelvin value relative
- * to the entity's supported [minKelvin] and [maxKelvin] range for display in a central pill.
- *
- */
-@Composable
-private fun ColorTempControl(
-    entity: EntityItem,
-    currentKelvin: Int,
-    minKelvin: Int,
-    maxKelvin: Int,
-    haClient: HomeAssistantClient?,
-    contentColor: Color,
-    backgroundColor: Color,
-    isCompact: Boolean = false
-) {
-    val (localKelvin, setLocalKelvin) = rememberDebouncedAction(
-        initialValue = currentKelvin.coerceIn(minKelvin, maxKelvin),
-        onSend = { v -> haClient?.callService("light", "turn_on", entity.id, JSONObject().put("color_temp_kelvin", v)) }
-    )
-
-    val step = ((maxKelvin - minKelvin) / 10).coerceAtLeast(100)
-    fun applyDelta(delta: Int) {
-        val next = (localKelvin + delta).coerceIn(minKelvin, maxKelvin)
-        if (next != localKelvin) setLocalKelvin(next)
+    val iconRes = remember(entity.id, entity.state, entity.customIconOnName, entity.customIconOffName) {
+        EntityIconMapper.getFinalIconForEntity(entity) ?: R.drawable.ic_default
     }
 
-    val tempPercent = ((localKelvin - minKelvin).toFloat() / (maxKelvin - minKelvin).toFloat() * 100f).toInt().coerceIn(0, 100)
-
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AnimatedIconButton(
-                icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Warmer", onClick = { applyDelta(-step) },
-                contentColor = contentColor, backgroundColor = backgroundColor, size = if (isCompact) 36.dp else 40.dp
-            )
-            Box(
-                modifier = Modifier
-                    .widthIn(min = if (isCompact) 50.dp else 60.dp)
-                    .height(if (isCompact) 36.dp else 40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(contentColor.copy(alpha = AlphaLow))
-                    .border(1.dp, contentColor.copy(alpha = AlphaMedium), RoundedCornerShape(8.dp))
-                    .semantics { disabled() }
-                    .focusable(false),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "$tempPercent%", fontSize = if (isCompact) 12.sp else 14.sp, fontWeight = FontWeight.Medium, color = contentColor)
+    val savedEntitiesManager = remember { SavedEntitiesManager(context) }
+    val handlePress: (PressType) -> Unit = remember(entity.id, haClient, savedEntitiesManager, isEntityInitialized) {
+        { press ->
+            if (isEntityInitialized) {
+                EntityActionExecutor.perform(
+                    entity = entity,
+                    press = press,
+                    haClient = haClient,
+                    savedEntitiesManager = savedEntitiesManager,
+                    onExpand = { expanded = true }
+                )
             }
-            AnimatedIconButton(
-                icon = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Cooler", onClick = { applyDelta(step) },
-                contentColor = contentColor, backgroundColor = backgroundColor, size = if (isCompact) 36.dp else 40.dp
+        }
+    }
+
+    // While expanded, BACK collapses the tile instead of closing the bar
+    DisposableEffect(expanded) {
+        if (expanded) {
+            val handler = {
+                expanded = false
+                true
+            }
+            OverlayBackDispatcher.register(handler)
+            onDispose { OverlayBackDispatcher.unregister(handler) }
+        } else {
+            onDispose { }
+        }
+    }
+
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            wasCardFocused.value = isFocused
+            delay(50)
+            bringIntoViewRequester.bringIntoView()
+            delay(100)
+            withContext(Dispatchers.Main.immediate) {
+                try { firstRowFocusRequester.requestFocus() } catch (e: Exception) { Log.e("LightTile", "Focus request failed", e) }
+            }
+        } else if (wasCardFocused.value) {
+            delay(100)
+            withContext(Dispatchers.Main.immediate) {
+                try {
+                    cardFocusRequester.requestFocus()
+                    wasCardFocused.value = false
+                } catch (e: Exception) { Log.e("LightTile", "Focus request failed", e) }
+            }
+        }
+    }
+
+    val fillFraction = if (isEnabled && supportsBrightness && (isOn || localBrightness > 0)) {
+        localBrightness / 100f
+    } else 0f
+
+    Card(
+        modifier = modifier
+            .focusRequester(cardFocusRequester)
+            .tvFocusFrame(isFocused && !expanded, TileShape)
+            .combinedClickable(
+                enabled = !expanded && isEnabled,
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true, color = animatedContentColor),
+                onClick = { handlePress(PressType.SINGLE) },
+                onLongClick = { handlePress(PressType.LONG) }
             )
+            .focusable(enabled = !expanded, interactionSource = interactionSource)
+            .dpadAdjust(
+                enabled = !expanded && isEnabled && supportsBrightness && adjustAxis != BarAdjustAxis.NONE,
+                adjustVertically = adjustAxis == BarAdjustAxis.VERTICAL,
+                onAdjust = adjustBrightness
+            )
+            .bringIntoViewRequester(bringIntoViewRequester),
+        shape = TileShape,
+        colors = CardDefaults.cardColors(
+            containerColor = surfaceColor,
+            contentColor = animatedContentColor
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Box(
+            modifier = Modifier.animateContentSize(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing))
+        ) {
+            // Value fill: live brightness shown behind the content
+            if (!expanded && fillFraction > 0f) {
+                Box(modifier = Modifier.matchParentSize()) {
+                    if (isHorizontal) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .fillMaxWidth()
+                                .fillMaxHeight(fillFraction)
+                                .background(accentColor.copy(alpha = 0.35f))
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(fillFraction)
+                                .background(accentColor.copy(alpha = 0.35f))
+                        )
+                    }
+                }
+            }
+
+            key(expanded) {
+                if (expanded) {
+                    ExpandedLightControls(
+                        entity = entity,
+                        haClient = haClient,
+                        uiState = uiState,
+                        isOn = isOn,
+                        iconRes = iconRes,
+                        accentColor = accentColor,
+                        accentContentColor = accentContentColor,
+                        contentColor = animatedContentColor,
+                        backgroundColor = surfaceColor,
+                        localBrightness = localBrightness,
+                        onAdjustBrightness = adjustBrightness,
+                        showBrightnessRow = showBrightnessRow,
+                        showWarmthRow = showWarmthRow,
+                        showColorRow = showColorRow,
+                        firstRowFocusRequester = firstRowFocusRequester,
+                        modifier = if (isHorizontal) Modifier.width(320.dp) else Modifier.fillMaxWidth()
+                    )
+                } else if (isHorizontal) {
+                    HorizontalTileContent(
+                        uiState = uiState,
+                        isOn = isOn,
+                        isEnabled = isEnabled,
+                        isFocused = isFocused,
+                        localBrightness = localBrightness,
+                        canAdjust = supportsBrightness && adjustAxis != BarAdjustAxis.NONE,
+                        supportsBrightness = supportsBrightness,
+                        iconRes = iconRes,
+                        accentColor = accentColor,
+                        accentContentColor = accentContentColor,
+                        contentColor = animatedContentColor
+                    )
+                } else {
+                    VerticalTileContent(
+                        entity = entity,
+                        uiState = uiState,
+                        isOn = isOn,
+                        isEnabled = isEnabled,
+                        isFocused = isFocused,
+                        localBrightness = localBrightness,
+                        canAdjust = supportsBrightness && adjustAxis != BarAdjustAxis.NONE,
+                        supportsBrightness = supportsBrightness,
+                        iconRes = iconRes,
+                        accentColor = accentColor,
+                        accentContentColor = accentContentColor,
+                        contentColor = animatedContentColor
+                    )
+                }
+            }
         }
     }
 }
 
-/**
- * A UI component for controlling the RGB color of a light entity.
- *
- * This control provides a selection interface to cycle through a predefined list of
- * standard colors (e.g., Red, Green, Blue, White, etc.). It uses [rememberDebouncedAction]
- * to handle color updates, sending the selected RGB values to Home Assistant via
- * the `light.turn_on` service.
- *
- * The component matches the current entity color to the closest available preset index
- * for its initial state and displays a [ColorDot] preview of the currently selected color.
- */
 @Composable
-private fun RgbColorControl(
-    entity: EntityItem,
-    currentColor: Color,
-    haClient: HomeAssistantClient?,
+private fun IconCircle(
+    iconRes: Int,
+    name: String,
+    active: Boolean,
+    accentColor: Color,
+    accentContentColor: Color,
     contentColor: Color,
-    backgroundColor: Color,
-    isCompact: Boolean = false
+    size: androidx.compose.ui.unit.Dp = 36.dp
 ) {
-    val colorOptions = remember {
-        listOf(
-            Color.White to "White", Color.Red to "Red", Color.Green to "Green", Color.Blue to "Blue",
-            Color.Yellow to "Yellow", Color.Cyan to "Cyan", Color.Magenta to "Magenta", Color(0xFFFF7F00) to "Orange",
-            Color(0xFF800080) to "Purple", Color(0xFF00FF7F) to "Spring Green"
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(if (active) accentColor else contentColor.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = SafePainterResource(id = iconRes),
+            contentDescription = name,
+            modifier = Modifier.size(size * 0.55f),
+            colorFilter = ColorFilter.tint(if (active) accentContentColor else contentColor)
         )
     }
+}
 
+private fun stateLine(isEnabled: Boolean, isOn: Boolean, supportsBrightness: Boolean, brightness: Int, rawState: String): String = when {
+    !isEnabled -> rawState
+    isOn && supportsBrightness -> "On · $brightness%"
+    isOn -> "On"
+    else -> "Off"
+}
+
+@Composable
+private fun VerticalTileContent(
+    entity: EntityItem,
+    uiState: LightUiState,
+    isOn: Boolean,
+    isEnabled: Boolean,
+    isFocused: Boolean,
+    localBrightness: Int,
+    canAdjust: Boolean,
+    supportsBrightness: Boolean,
+    iconRes: Int,
+    accentColor: Color,
+    accentContentColor: Color,
+    contentColor: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor)
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 10.dp)
+        ) {
+            Text(
+                text = uiState.name,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stateLine(isEnabled, isOn, supportsBrightness, localBrightness, entity.state),
+                fontSize = 12.sp,
+                color = contentColor.copy(alpha = 0.65f)
+            )
+        }
+
+        if (isFocused && isEnabled && canAdjust) {
+            // Adjust affordance: ‹ value › while focused
+            Text(text = "‹", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "$localBrightness%",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 6.dp)
+            )
+            Text(text = "›", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        } else if (uiState.indicatorColor != null) {
+            ColorDot(color = uiState.indicatorColor, outline = contentColor, size = 14.dp)
+        }
+    }
+}
+
+@Composable
+private fun HorizontalTileContent(
+    uiState: LightUiState,
+    isOn: Boolean,
+    isEnabled: Boolean,
+    isFocused: Boolean,
+    localBrightness: Int,
+    canAdjust: Boolean,
+    supportsBrightness: Boolean,
+    iconRes: Int,
+    accentColor: Color,
+    accentContentColor: Color,
+    contentColor: Color
+) {
+    Column(
+        modifier = Modifier
+            .width(120.dp)
+            .heightIn(min = 150.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        IconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = uiState.name,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (isFocused && isEnabled && canAdjust) {
+            Text(text = "▴ $localBrightness% ▾", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        } else if (isOn && supportsBrightness) {
+            Text(text = "$localBrightness%", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+/**
+ * The in-place expansion shown after long-press: stacked control rows.
+ * Up/down moves between rows, left/right adjusts the focused row, BACK collapses.
+ */
+@Composable
+private fun ExpandedLightControls(
+    entity: EntityItem,
+    haClient: HomeAssistantClient?,
+    uiState: LightUiState,
+    isOn: Boolean,
+    iconRes: Int,
+    accentColor: Color,
+    accentContentColor: Color,
+    contentColor: Color,
+    backgroundColor: Color,
+    localBrightness: Int,
+    onAdjustBrightness: (Int) -> Unit,
+    showBrightnessRow: Boolean,
+    showWarmthRow: Boolean,
+    showColorRow: Boolean,
+    firstRowFocusRequester: FocusRequester,
+    modifier: Modifier = Modifier
+) {
+    val firstRow = when {
+        showBrightnessRow -> "brightness"
+        showWarmthRow -> "warmth"
+        showColorRow -> "color"
+        else -> ""
+    }
+
+    Column(
+        modifier = modifier.padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor, size = 32.dp)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)
+            ) {
+                Text(
+                    text = uiState.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stateLine(true, isOn, showBrightnessRow, localBrightness, entity.state),
+                    fontSize = 12.sp,
+                    color = contentColor.copy(alpha = 0.65f)
+                )
+            }
+            PowerButton(
+                isOn = isOn,
+                onClick = { haClient?.callService("light", if (isOn) "turn_off" else "turn_on", entity.id) },
+                contentColor = contentColor,
+                backgroundColor = backgroundColor,
+                size = 32.dp
+            )
+        }
+
+        if (showBrightnessRow) {
+            AdjustableControlRow(
+                label = "BRIGHTNESS",
+                valueText = "$localBrightness%",
+                contentColor = contentColor,
+                onAdjust = onAdjustBrightness,
+                focusRequester = if (firstRow == "brightness") firstRowFocusRequester else null
+            ) {
+                ControlTrack(trackColor = contentColor.copy(alpha = 0.15f)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth((localBrightness / 100f).coerceIn(0f, 1f))
+                            .background(accentColor)
+                    )
+                }
+            }
+        }
+
+        if (showWarmthRow) {
+            WarmthRow(
+                entity = entity,
+                haClient = haClient,
+                uiState = uiState,
+                contentColor = contentColor,
+                focusRequester = if (firstRow == "warmth") firstRowFocusRequester else null
+            )
+        }
+
+        if (showColorRow) {
+            ColorRow(
+                entity = entity,
+                haClient = haClient,
+                uiState = uiState,
+                contentColor = contentColor,
+                focusRequester = if (firstRow == "color") firstRowFocusRequester else null
+            )
+        }
+    }
+}
+
+@Composable
+private fun WarmthRow(
+    entity: EntityItem,
+    haClient: HomeAssistantClient?,
+    uiState: LightUiState,
+    contentColor: Color,
+    focusRequester: FocusRequester?
+) {
+    val (localKelvin, setLocalKelvin) = rememberDebouncedAction(
+        initialValue = uiState.currentKelvin.coerceIn(uiState.minKelvin, uiState.maxKelvin),
+        onSend = { v -> haClient?.callService("light", "turn_on", entity.id, JSONObject().put("color_temp_kelvin", v)) }
+    )
+    val step = ((uiState.maxKelvin - uiState.minKelvin) / 10).coerceAtLeast(100)
+    val fraction = if (uiState.maxKelvin > uiState.minKelvin) {
+        (localKelvin - uiState.minKelvin).toFloat() / (uiState.maxKelvin - uiState.minKelvin).toFloat()
+    } else 0f
+
+    AdjustableControlRow(
+        label = "WARMTH",
+        valueText = "${localKelvin}K",
+        contentColor = contentColor,
+        onAdjust = { direction ->
+            val next = (localKelvin + direction * step).coerceIn(uiState.minKelvin, uiState.maxKelvin)
+            if (next != localKelvin) setLocalKelvin(next)
+        },
+        focusRequester = focusRequester
+    ) {
+        ControlTrack(
+            trackBrush = Brush.horizontalGradient(
+                listOf(Color(0xFFFF9800), Color(0xFFFFE0B2), Color(0xFFB3E5FC))
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(fraction.coerceIn(0f, 1f))
+                    .fillMaxHeight(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                )
+            }
+        }
+    }
+}
+
+private val ColorOptions = listOf(
+    Color.White to "White", Color.Red to "Red", Color.Green to "Green", Color.Blue to "Blue",
+    Color.Yellow to "Yellow", Color.Cyan to "Cyan", Color.Magenta to "Magenta", Color(0xFFFF7F00) to "Orange",
+    Color(0xFF800080) to "Purple", Color(0xFF00FF7F) to "Spring Green"
+)
+
+@Composable
+private fun ColorRow(
+    entity: EntityItem,
+    haClient: HomeAssistantClient?,
+    uiState: LightUiState,
+    contentColor: Color,
+    focusRequester: FocusRequester?
+) {
     fun closestIndex(c: Color): Int {
         var best = 0; var bestDist = Float.MAX_VALUE
-        for (i in colorOptions.indices) {
-            val o = colorOptions[i].first
+        for (i in ColorOptions.indices) {
+            val o = ColorOptions[i].first
             val d = (o.red - c.red)*(o.red - c.red) + (o.green - c.green)*(o.green - c.green) + (o.blue - c.blue)*(o.blue - c.blue)
             if (d < bestDist) { bestDist = d; best = i }
         }
@@ -980,9 +858,9 @@ private fun RgbColorControl(
     }
 
     val (localColorIndex, setLocalColorIndex) = rememberDebouncedAction(
-        initialValue = closestIndex(currentColor),
+        initialValue = closestIndex(uiState.rgbColor),
         onSend = { i ->
-            val col = colorOptions[i].first
+            val col = ColorOptions[i].first
             haClient?.callService(
                 "light", "turn_on", entity.id,
                 JSONObject().put("rgb_color", JSONArray().put((col.red * 255).toInt()).put((col.green * 255).toInt()).put((col.blue * 255).toInt()))
@@ -990,37 +868,121 @@ private fun RgbColorControl(
         }
     )
 
-    fun applyStep(delta: Int) {
-        val next = (localColorIndex + delta + colorOptions.size) % colorOptions.size
-        if (next != localColorIndex) setLocalColorIndex(next)
-    }
-
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AnimatedIconButton(
-                icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Color", onClick = { applyStep(-1) },
-                contentColor = contentColor, backgroundColor = backgroundColor, size = if (isCompact) 36.dp else 40.dp
-            )
-            Box(
-                modifier = Modifier
-                    .size(if (isCompact) 50.dp else 60.dp, if (isCompact) 36.dp else 40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(contentColor.copy(alpha = AlphaLow))
-                    .border(1.dp, contentColor.copy(alpha = AlphaMedium), RoundedCornerShape(8.dp))
-                    .semantics { disabled() }
-                    .focusable(false),
-                contentAlignment = Alignment.Center
-            ) {
-                ColorDot(color = colorOptions[localColorIndex].first, outline = contentColor, size = if (isCompact) 18.dp else 22.dp)
+    AdjustableControlRow(
+        label = "COLOR",
+        valueText = ColorOptions[localColorIndex].second,
+        contentColor = contentColor,
+        onAdjust = { direction ->
+            setLocalColorIndex((localColorIndex + direction + ColorOptions.size) % ColorOptions.size)
+        },
+        focusRequester = focusRequester
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+            ColorOptions.forEachIndexed { index, (color, _) ->
+                val selected = index == localColorIndex
+                Box(
+                    modifier = Modifier
+                        .size(if (selected) 16.dp else 12.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .then(
+                            if (selected) Modifier.border(2.dp, Color.White, CircleShape) else Modifier
+                        )
+                )
             }
-            AnimatedIconButton(
-                icon = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Color", onClick = { applyStep(1) },
-                contentColor = contentColor, backgroundColor = backgroundColor, size = if (isCompact) 36.dp else 40.dp
+        }
+    }
+}
+
+/**
+ * A focusable control row for the expanded tile. Left/right adjusts the value via
+ * [onAdjust]; the row itself is one focus stop, so up/down moves between rows.
+ */
+@Composable
+private fun AdjustableControlRow(
+    label: String,
+    valueText: String,
+    contentColor: Color,
+    onAdjust: (Int) -> Unit,
+    focusRequester: FocusRequester?,
+    track: @Composable () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .tvFocusFrame(isFocused, ControlRowShape)
+            .clip(ControlRowShape)
+            .background(contentColor.copy(alpha = if (isFocused) 0.1f else 0.04f))
+            .dpadAdjust(enabled = true, adjustVertically = false, onAdjust = onAdjust)
+            .focusable(interactionSource = interactionSource)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = contentColor.copy(alpha = if (isFocused) 0.85f else 0.6f)
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            track()
+        }
+        if (valueText.isNotEmpty()) {
+            Text(
+                text = valueText,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 10.dp)
             )
         }
     }
+}
+
+@Composable
+private fun ControlTrack(
+    trackColor: Color? = null,
+    trackBrush: Brush? = null,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(8.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .then(
+                when {
+                    trackBrush != null -> Modifier.background(trackBrush)
+                    trackColor != null -> Modifier.background(trackColor)
+                    else -> Modifier
+                }
+            )
+    ) {
+        content()
+    }
+}
+
+/**
+ * A small circular visual indicator used to display the current color or temperature of a light.
+ */
+@Composable
+private fun ColorDot(color: Color?, outline: Color, size: androidx.compose.ui.unit.Dp = 16.dp) {
+    val dot = color ?: Color.Transparent
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(dot)
+            .border(1.dp, outline.copy(alpha = 0.6f), CircleShape)
+    )
+}
+
+/** Simple luma heuristic (sRGB) to select black/white for readability */
+private fun lightContentFor(bg: Color): Color {
+    val luma = 0.299f * bg.red + 0.587f * bg.green + 0.114f * bg.blue
+    return if (luma > 0.6f) Color.Black else Color.White
 }

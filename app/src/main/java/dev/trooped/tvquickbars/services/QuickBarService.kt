@@ -43,6 +43,7 @@ import dev.trooped.tvquickbars.persistence.QuickBarManager
 import dev.trooped.tvquickbars.persistence.SavedEntitiesManager
 import dev.trooped.tvquickbars.persistence.SecurePrefsManager
 import dev.trooped.tvquickbars.persistence.TriggerKeyManager
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.OverlayBackDispatcher
 import dev.trooped.tvquickbars.ui.QuickBar.overlay.AnimatedQuickBar
 import dev.trooped.tvquickbars.ui.EntityIconMapper
 import dev.trooped.tvquickbars.utils.DemoModeManager
@@ -635,12 +636,16 @@ class QuickBarService : AccessibilityService(), HomeAssistantListener {
                     return true
                 }
                 KeyEvent.ACTION_UP -> {
+                    // clear the guard now that UP arrived
+                    swallowSystemUntilKeyUp = -1
+                    // An expanded tile may claim BACK to collapse in place before the bar closes
+                    if (OverlayBackDispatcher.dispatch()) {
+                        return true
+                    }
                     hideOverlay()
                     resetKeyGestureState(overlayOwnerKeyCode)
                     overlayOwnerKeyCode = -1
                     ownerKeyArmedToClose = false
-                    // clear the guard now that UP arrived
-                    swallowSystemUntilKeyUp = -1
                     return true
                 }
                 else -> return true

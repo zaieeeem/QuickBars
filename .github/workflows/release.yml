@@ -1,0 +1,61 @@
+name: Release
+
+# Publishes a signed APK as a GitHub release on every push to main, so update
+# managers like Obtainium can track this repository and install updates.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compute version
+        id: version
+        run: |
+          BASE=$(grep -oP 'val baseVersionName = "\K[^"]+' app/build.gradle.kts)
+          echo "name=${BASE}-r${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "code=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+      - name: Build signed release APK
+        env:
+          # Defaults match the committed CI keystore; define repository secrets
+          # with the same names to switch to a private keystore.
+          HA_QUICKBARS_KEYSTORE_PASSWORD: ${{ secrets.HA_QUICKBARS_KEYSTORE_PASSWORD || 'quickbars-ci' }}
+          HA_QUICKBARS_KEY_ALIAS: ${{ secrets.HA_QUICKBARS_KEY_ALIAS || 'quickbars-ci' }}
+          HA_QUICKBARS_KEY_PASSWORD: ${{ secrets.HA_QUICKBARS_KEY_PASSWORD || 'quickbars-ci' }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease \
+            -PciVersionCode=${{ steps.version.outputs.code }} \
+            -PciVersionName=${{ steps.version.outputs.name }} \
+            -PHA_QUICKBARS_KEYSTORE_FILE="$GITHUB_WORKSPACE/.ci/quickbars-ci.jks"
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk "QuickBars-${{ steps.version.outputs.name }}.apk"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.name }}
+          name: QuickBars ${{ steps.version.outputs.name }}
+          generate_release_notes: true
+          files: QuickBars-*.apk

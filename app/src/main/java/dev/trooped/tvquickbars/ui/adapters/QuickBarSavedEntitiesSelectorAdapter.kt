@@ -1,5 +1,6 @@
 package dev.trooped.tvquickbars.ui.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,7 @@ import dev.trooped.tvquickbars.ui.extensions.setThemedResource
  * Adapter for displaying a list of selectable entities in a RecyclerView.
  * This adapter allows users to select entities to add to a QuickBar.
  *
- * @property entities The list of EntityItem objects to display.
+ * @property entities The full list of EntityItem objects to display.
  * @property selectedEntityIds A mutable set of selected entity IDs.
  * @property onEntitySelected Callback function to handle entity selection changes.
  */
@@ -27,6 +28,28 @@ class QuickBarSavedEntitiesSelectorAdapter(
     private val selectedEntityIds: MutableSet<String>,
     private val onEntitySelected: (entityId: String, isSelected: Boolean) -> Unit
 ) : RecyclerView.Adapter<QuickBarSavedEntitiesSelectorAdapter.ViewHolder>() {
+
+    // The currently displayed (filtered) entities. Selection state lives in
+    // selectedEntityIds, so entities checked and then filtered out stay checked.
+    private var filteredEntities: List<EntityItem> = entities
+
+    /**
+     * Filters the displayed entities by the given query (case-insensitive match
+     * on friendly name, custom name and entity id). A blank query restores the full list.
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    fun filter(query: String) {
+        filteredEntities = if (query.isBlank()) {
+            entities
+        } else {
+            entities.filter {
+                it.friendlyName.contains(query, ignoreCase = true) ||
+                        it.customName.contains(query, ignoreCase = true) ||
+                        it.id.contains(query, ignoreCase = true)
+            }
+        }
+        notifyDataSetChanged()
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val entityName: TextView = view.findViewById(R.id.entity_name)
@@ -41,7 +64,7 @@ class QuickBarSavedEntitiesSelectorAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val entity = entities[position]
+        val entity = filteredEntities[position]
 
         // Set entity name
         holder.entityName.text = entity.customName.ifEmpty { entity.friendlyName }
@@ -72,5 +95,5 @@ class QuickBarSavedEntitiesSelectorAdapter(
         }
     }
 
-    override fun getItemCount() = entities.size
+    override fun getItemCount() = filteredEntities.size
 }

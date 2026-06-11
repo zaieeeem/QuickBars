@@ -73,6 +73,8 @@
     <string name="dialog_edit_entity_title">Edit Entity</string>
     <string name="dialog_edit_entity_label_name">Display Name</string>
     <string name="quickbar_editor_error_no_entities">No saved entities found. Please go to the \'Entities\' screen to import them first.</string>
+    <string name="entity_selector_search_hint">Search entities</string>
+    <string name="entity_selector_search_no_results">No entities match your search</string>
 
 
     <!-- Entities Screen -->
