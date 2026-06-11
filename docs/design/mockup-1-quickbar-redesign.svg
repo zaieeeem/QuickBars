@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" font-family="sans-serif">
+  <defs>
+    <radialGradient id="tvGlow" cx="35%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#1b2433"/>
+      <stop offset="55%" stop-color="#0e1219"/>
+      <stop offset="100%" stop-color="#07090d"/>
+    </radialGradient>
+    <linearGradient id="scrim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="amberFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFB74D" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#FFA726" stop-opacity="0.32"/>
+    </linearGradient>
+    <linearGradient id="purpleFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#BA68C8" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#AB47BC" stop-opacity="0.28"/>
+    </linearGradient>
+    <clipPath id="tile1c"><rect x="940" y="104" width="280" height="64" rx="16"/></clipPath>
+    <clipPath id="tile3c"><rect x="940" y="256" width="280" height="64" rx="16"/></clipPath>
+    <clipPath id="tile5c"><rect x="940" y="408" width="280" height="64" rx="16"/></clipPath>
+  </defs>
+
+  <!-- TV content behind overlay -->
+  <rect width="1280" height="720" fill="url(#tvGlow)"/>
+  <circle cx="380" cy="300" r="190" fill="#27405e" opacity="0.35"/>
+  <circle cx="620" cy="480" r="150" fill="#5e3a27" opacity="0.25"/>
+  <circle cx="180" cy="560" r="120" fill="#2c5e4e" opacity="0.2"/>
+  <text x="420" y="660" fill="#ffffff" opacity="0.18" font-size="20">your show keeps playing underneath</text>
+
+  <!-- right-edge scrim so the bar floats legibly over content -->
+  <rect x="780" width="500" height="720" fill="url(#scrim)"/>
+
+  <!-- ======= QUICK BAR PANEL ======= -->
+  <rect x="920" y="40" width="320" height="640" rx="24" fill="#101319" fill-opacity="0.94" stroke="#ffffff" stroke-opacity="0.09" stroke-width="1.5"/>
+
+  <!-- header -->
+  <text x="940" y="84" fill="#ffffff" font-size="19" font-weight="600">Living Room</text>
+  <circle cx="1206" cy="78" r="4" fill="#66BB6A"/>
+  <text x="1196" y="83" text-anchor="end" fill="#ffffff" opacity="0.45" font-size="12">connected</text>
+
+  <!-- TILE 1 : Ceiling Light — ON 65%, FOCUSED (value fill IS the slider) -->
+  <rect x="940" y="104" width="280" height="64" rx="16" fill="#23262e"/>
+  <g clip-path="url(#tile1c)">
+    <rect x="940" y="104" width="182" height="64" fill="url(#amberFill)"/>
+  </g>
+  <rect x="938.5" y="102.5" width="283" height="67" rx="17.5" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+  <circle cx="972" cy="136" r="20" fill="#FFB74D"/>
+  <g stroke="#3E2723" stroke-width="2" fill="none" stroke-linecap="round">
+    <circle cx="972" cy="133" r="7" fill="none"/>
+    <line x1="968" y1="143" x2="976" y2="143"/>
+    <line x1="969" y1="146.5" x2="975" y2="146.5"/>
+  </g>
+  <text x="1002" y="132" fill="#ffffff" font-size="16" font-weight="600">Ceiling Light</text>
+  <text x="1002" y="152" fill="#ffffff" opacity="0.65" font-size="13">On &#183; 65%</text>
+  <text x="1166" y="142" fill="#ffffff" font-size="15" font-weight="700">&#8249;</text>
+  <text x="1178" y="141" fill="#ffffff" font-size="14" font-weight="600">65%</text>
+  <text x="1209" y="142" fill="#ffffff" font-size="15" font-weight="700">&#8250;</text>
+
+  <!-- TILE 2 : Kitchen — off -->
+  <rect x="940" y="180" width="280" height="64" rx="16" fill="#23262e"/>
+  <circle cx="972" cy="212" r="20" fill="#ffffff" fill-opacity="0.08"/>
+  <g stroke="#9aa0ab" stroke-width="2" fill="none" stroke-linecap="round">
+    <circle cx="972" cy="209" r="7"/>
+    <line x1="968" y1="219" x2="976" y2="219"/>
+    <line x1="969" y1="222.5" x2="975" y2="222.5"/>
+  </g>
+  <text x="1002" y="208" fill="#ffffff" font-size="16" font-weight="600">Kitchen</text>
+  <text x="1002" y="228" fill="#ffffff" opacity="0.45" font-size="13">Off</text>
+
+  <!-- TILE 3 : Lamp — ON 30% -->
+  <rect x="940" y="256" width="280" height="64" rx="16" fill="#23262e"/>
+  <g clip-path="url(#tile3c)">
+    <rect x="940" y="256" width="84" height="64" fill="url(#amberFill)"/>
+  </g>
+  <circle cx="972" cy="288" r="20" fill="#FFB74D"/>
+  <g stroke="#3E2723" stroke-width="2" fill="none" stroke-linecap="round">
+    <circle cx="972" cy="285" r="7"/>
+    <line x1="968" y1="295" x2="976" y2="295"/>
+    <line x1="969" y1="298.5" x2="975" y2="298.5"/>
+  </g>
+  <text x="1002" y="284" fill="#ffffff" font-size="16" font-weight="600">Reading Lamp</text>
+  <text x="1002" y="304" fill="#ffffff" opacity="0.65" font-size="13">On &#183; 30%</text>
+
+  <!-- TILE 4 : Thermostat -->
+  <rect x="940" y="332" width="280" height="64" rx="16" fill="#23262e"/>
+  <circle cx="972" cy="364" r="20" fill="#FF7043" fill-opacity="0.9"/>
+  <g stroke="#3E2723" stroke-width="2" fill="none" stroke-linecap="round">
+    <rect x="969" y="353" width="6" height="13" rx="3"/>
+    <circle cx="972" cy="371" r="4.5"/>
+  </g>
+  <text x="1002" y="360" fill="#ffffff" font-size="16" font-weight="600">Thermostat</text>
+  <text x="1002" y="380" fill="#ffffff" opacity="0.65" font-size="13">Heating &#183; set 21.5&#176;</text>
+  <text x="1208" y="370" text-anchor="end" fill="#FF8A65" font-size="16" font-weight="700">21.5&#176;</text>
+
+  <!-- TILE 5 : TV Volume — 35% -->
+  <rect x="940" y="408" width="280" height="64" rx="16" fill="#23262e"/>
+  <g clip-path="url(#tile5c)">
+    <rect x="940" y="408" width="98" height="64" fill="url(#purpleFill)"/>
+  </g>
+  <circle cx="972" cy="440" r="20" fill="#BA68C8"/>
+  <g fill="#2a1030" stroke="none">
+    <path d="M 964,437 L 969,437 L 975,431 L 975,449 L 969,443 L 964,443 Z"/>
+  </g>
+  <path d="M 978,434 Q 982,440 978,446" stroke="#2a1030" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="1002" y="436" fill="#ffffff" font-size="16" font-weight="600">TV Volume</text>
+  <text x="1002" y="456" fill="#ffffff" opacity="0.65" font-size="13">35%</text>
+
+  <!-- TILE 6 : Scene -->
+  <rect x="940" y="484" width="280" height="64" rx="16" fill="#23262e"/>
+  <circle cx="972" cy="516" r="20" fill="#ffffff" fill-opacity="0.10"/>
+  <path d="M 972,506 L 974.8,512.2 L 981.5,512.9 L 976.5,517.4 L 978,524 L 972,520.6 L 966,524 L 967.5,517.4 L 962.5,512.9 L 969.2,512.2 Z" fill="#90A4AE"/>
+  <text x="1002" y="512" fill="#ffffff" font-size="16" font-weight="600">Movie Night</text>
+  <text x="1002" y="532" fill="#ffffff" opacity="0.45" font-size="13">Scene</text>
+  <text x="1208" y="522" text-anchor="end" fill="#ffffff" opacity="0.5" font-size="14">&#9654;</text>
+
+  <!-- TILE 7 : Lock -->
+  <rect x="940" y="560" width="280" height="64" rx="16" fill="#23262e"/>
+  <circle cx="972" cy="592" r="20" fill="#81C784" fill-opacity="0.9"/>
+  <g stroke="#1B3320" stroke-width="2" fill="none" stroke-linecap="round">
+    <rect x="966" y="591" width="12" height="9" rx="2" fill="#1B3320" stroke="none"/>
+    <path d="M 968,591 L 968,587 Q 968,582.5 972,582.5 Q 976,582.5 976,587 L 976,591"/>
+  </g>
+  <text x="1002" y="588" fill="#ffffff" font-size="16" font-weight="600">Front Door</text>
+  <text x="1002" y="608" fill="#ffffff" opacity="0.65" font-size="13">Locked</text>
+
+  <!-- footer hints (replaces the close button: BACK dismisses) -->
+  <line x1="940" y1="640" x2="1220" y2="640" stroke="#ffffff" stroke-opacity="0.08"/>
+  <text x="1080" y="664" text-anchor="middle" fill="#ffffff" opacity="0.55" font-size="12.5">
+    <tspan font-weight="700">OK</tspan> toggle&#160;&#160;&#160;<tspan font-weight="700">&#8249; &#8250;</tspan> adjust&#160;&#160;&#160;<tspan font-weight="700">hold</tspan> more&#160;&#160;&#160;<tspan font-weight="700">back</tspan> close
+  </text>
+
+  <!-- caption -->
+  <text x="60" y="80" fill="#ffffff" font-size="26" font-weight="700" opacity="0.92">Redesigned QuickBar</text>
+  <text x="60" y="112" fill="#ffffff" font-size="15" opacity="0.6">Every tile IS the slider &#8212; no expand, no +/&#8722; buttons.</text>
+  <text x="60" y="138" fill="#ffffff" font-size="15" opacity="0.6">Focus a light and just hold &#8250; to brighten it. OK toggles.</text>
+  <text x="60" y="164" fill="#ffffff" font-size="15" opacity="0.6">The amber fill shows brightness at a glance, even unfocused.</text>
+</svg>
