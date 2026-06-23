@@ -16,12 +16,12 @@ merges or deploys. Structure and discipline are your job, not an afterthought.
 **You are the *sole responsible agent* for THIS repo** — you don't act in any other
 repo, and no other agent acts in yours. One repo, one owner.
 
-## 0.1 Keep `tasks.md` current (every repo)
-Every repo has a **`tasks.md`** at its root — the live to-do for *this* repo. The
-responsible agent **keeps it up to date**: what's pending, in progress, and done, in
-short scannable lines, updated as work changes (not just at the end). It's read
-**automatically by a homelab-wide todo integration**, so treat it as a machine-read
-source of truth — keep it accurate and current.
+## 0.1 Keep the project wiki current (every repo)
+Every repo is a small markdown **wiki** — `tasks.md`, `notes.md`, `CLAUDE.md`,
+`memory.md`, `index.md`, `log.md`, `chats/` at the root — that **Goblin** reads as
+context and writes as memory, and that drives the Kanban board. Keeping it current IS
+the job, not an afterthought. The full **OKF / LLM-wiki contract** (each file's role,
+the format, the cadence) is **§10 below — read it.**
 
 ## 1. Repos & where they live
 - All repos live under the **`zaieeeem` GitHub org** — never the personal `zaiemv` account.
@@ -100,3 +100,90 @@ own pipeline (still git-by-the-book: branch → PR, secrets out of git):
 We use **git** today. `jj` (Jujutsu, git-compatible) may help with many parallel agents
 later — but the discipline above (branch/worktree isolation + PRs) matters more than the
 tool, and works the same under jj. Don't switch unilaterally.
+
+## 10. The project wiki — OKF / LLM-wiki contract (Goblin)
+**Goblin** is an LLM-wiki engine with a Kanban board on the front. **Every repo is a
+small, typed, human-readable markdown wiki** the agent reads as context and writes as
+memory. The board (cards = projects, subtask badges = `tasks.md`) is a *view* of that
+wiki — nothing lives in a proprietary DB; it's all markdown in git. Keeping the wiki
+current is the job.
+
+### Format: OKF (Obsidian Knowledge Format)
+OKF is **fully conformant with Google Cloud's Open Knowledge Format (OKF) v0.1** (same
+acronym, our name) — so a project's wiki is portable and interoperable.
+- **A directory of markdown files.** One concept = one file; the **file path is the
+  concept's identity**. Subdirectories group concepts.
+- **YAML frontmatter on every file.** Exactly one **required** field — `type`.
+  Recommended (use what applies): `title`, `description`, `tags`, `timestamp` (ISO-8601),
+  `resource` (URL to the real thing, when one exists):
+  ```yaml
+  ---
+  type: tasks
+  title: <repo> tasks
+  description: One-line summary of this node
+  tags: [auth, backend]
+  timestamp: 2026-06-23T14:30:00Z
+  resource: https://github.com/zaieeeem/<repo>
+  ---
+  ```
+- **Reserved filenames:** `index.md` (a level's map-of-content / front door) and `log.md`
+  (chronological change history) — Goblin auto-maintains both.
+- **Cross-link with standard markdown links** — `see [the auth flow](./notes.md)` — so the
+  wiki forms a navigable graph. (Obsidian `[[wikilinks]]` are fine for humans; write
+  standard `[](path)` links for OKF portability.)
+- The body after the frontmatter is freeform.
+
+### Per-project file contract (the SAME at every repo root)
+No two-tier projects — Goblin-created or existing-repo, the files are the same (linking
+scaffolds any missing):
+
+| File | `type:` | Owner | Agent behavior |
+|---|---|---|---|
+| `tasks.md` | `tasks` | shared | checklist → the card's subtask badge; agent keeps current, human checks items |
+| `notes.md` | `note` | **human** | agent **reads for context, NEVER overwrites** — the human's scratchpad + steering channel |
+| `CLAUDE.md` | `config` | human | operating instructions, auto-loaded by `claude` each turn (separate from this AGENTS.md) |
+| `memory.md` | `memory` | agent | the agent's durable learned facts (agent reads + rewrites) |
+| `index.md` | `index` | agent (auto) | map-of-content; refreshed after turns |
+| `log.md` | `log` | agent (auto) | append-only activity history |
+| `chats/` | — | Goblin | persisted chat transcripts |
+| `.goblin/board.json` | — | Goblin | the board manifest — **never hand-edit** (Goblin storage, not per-repo) |
+
+Card **columns** (Backlog · Active · Review · Done) track the **project's** stage and are
+moved by the human; `tasks.md` tracks the work inside it.
+
+### `tasks.md` — exact format (drives the board)
+OKF frontmatter `type: tasks` + a plain GitHub-style checklist:
+```markdown
+---
+type: tasks
+title: <repo> tasks
+---
+
+# Tasks
+
+## In progress
+- [ ] Wire the auth flow — started 2026-06-23
+
+## Up next
+- [ ] Add the settings screen
+
+## Done
+- [x] Bootstrap the server
+```
+Goblin parses `- [ ]` / `- [x]` (also `*`/`+` bullets, `[X]` on read; normalizes on
+write) and shows the count as the card's subtask badge (e.g. 2/5). It **only** rewrites
+checklist lines — frontmatter, headings, and prose are preserved — so group with
+`## In progress` / `## Up next` / `## Done` freely. The plain format is deliberate so
+**Obsidian and Vikunja read the same file**.
+
+### How agents behave (cadence + memory)
+- **Update at boundaries, not on a timer** — mark a task in-progress when you start,
+  check it when you finish; don't commit noise on a clock.
+- **The wiki is your long-term memory.** Write durable facts to `memory.md` and task
+  state to `tasks.md` as you learn them, and **before a context compaction**; re-read
+  `tasks.md` + `CLAUDE.md` + `memory.md` + `notes.md` at session start.
+- **Never clobber `notes.md`** — it's the human's; read it for steering, don't rewrite it.
+- `index.md` / `log.md` are mostly automatic — don't fight them.
+- *(Planned)* Claude Code **hooks** enforce the mechanics — `PreCompact` flushes/commits
+  the wiki before compaction, `Stop` auto-commits + refreshes `index.md` + validates
+  `tasks.md`, `SessionStart` reloads it.
