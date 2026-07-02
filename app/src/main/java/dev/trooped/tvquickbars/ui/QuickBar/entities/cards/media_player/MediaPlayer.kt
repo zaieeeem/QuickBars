@@ -6,14 +6,12 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,13 +22,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -40,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -71,12 +72,24 @@ import dev.trooped.tvquickbars.ui.EntityIconMapper
 import dev.trooped.tvquickbars.ui.QuickBar.controls.PowerButton
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.AlphaLow
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.AlphaMedium
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.BarAdjustAxis
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.LocalBarAdjustAxis
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.OverlayBackDispatcher
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.TileIconCircle
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.TvTileShape
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.accentContentFor
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.dpadAdjust
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.rememberDebouncedAction
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.resolveTileAccent
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.tvFocusFrame
 import dev.trooped.tvquickbars.utils.EntityActionExecutor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import kotlin.text.ifEmpty
+
+private const val VolumeStepPercent = 5
 
 /**
  * UI state representation for a Media Player entity.
@@ -91,6 +104,8 @@ import kotlin.text.ifEmpty
  * @property isPlaying Specifically indicates if the current state is "playing".
  * @property isMuted Indicates if the volume is currently muted based on the entity attributes.
  * @property iconRes The resource ID of the icon to be displayed, determined by the entity's type and state.
+ * @property volumePercent Current volume 0-100, or null when the player does not report one.
+ * @property canSetVolume Whether the player supports direct volume setting (VOLUME_SET feature).
  */
 data class MediaPlayerUiState(
     val name: String,
@@ -99,7 +114,9 @@ data class MediaPlayerUiState(
     val isEnabled: Boolean,
     val isPlaying: Boolean,
     val isMuted: Boolean,
-    val iconRes: Int
+    val iconRes: Int,
+    val volumePercent: Int?,
+    val canSetVolume: Boolean
 )
 
 /**
@@ -121,23 +138,27 @@ fun rememberMediaPlayerUiState(entity: EntityItem): MediaPlayerUiState {
     val isOn = remember(state) { isMediaOn(state) }
     val isPlaying = remember(state) { isMediaPlaying(state) }
     val isMuted = remember(entity.attributes) { isMediaMuted(entity) }
-    
+    val volumePercent = remember(entity.attributes) { mediaVolumePercent(entity) }
+    val canSetVolume = remember(entity.attributes) { supportsVolumeSet(entity) }
+
     val iconRes = remember(entity.id, entity.state, entity.customIconOnName, entity.customIconOffName) {
         EntityIconMapper.getFinalIconForEntity(entity) ?: R.drawable.ic_default
     }
 
     return MediaPlayerUiState(
         name = name, state = state, isOn = isOn, isEnabled = isEnabled,
-        isPlaying = isPlaying, isMuted = isMuted, iconRes = iconRes
+        isPlaying = isPlaying, isMuted = isMuted, iconRes = iconRes,
+        volumePercent = volumePercent, canSetVolume = canSetVolume
     )
 }
 
 /**
  * A composable function that represents a media player entity as a card in the QuickBar UI.
  *
- * This card displays the current state of a Home Assistant media player entity (e.g., Playing, Paused, Off)
- * and provides interactive controls. It supports both a standard compact view and an expanded view
- * containing playback controls (play/pause, skip, volume, and power).
+ * The card follows the overlay tile system: while the tile is focused, the free D-pad axis
+ * adjusts the volume directly (the tile background fills to show the level), OK performs the
+ * configured press action, long-press expands the playback controls in place, and BACK
+ * collapses the expanded panel before closing the bar.
  *
  * @param entity The [EntityItem] data object containing the media player's state and attributes.
  * @param haClient The [HomeAssistantClient] used to dispatch service calls for media control.
@@ -159,6 +180,7 @@ fun MediaPlayerEntityCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    val adjustAxis = LocalBarAdjustAxis.current
     val cardFocusRequester = remember { FocusRequester() }
     val closeBtnFocusRequester = remember { FocusRequester() }
 
@@ -171,13 +193,17 @@ fun MediaPlayerEntityCard(
         if (isFocused) wasCardFocused.value = true
     }
 
-    var isPressed by remember { mutableStateOf(false) }
-    LaunchedEffect(interactionSource) {
-        interactionSource.interactions.collect { interaction ->
-            when (interaction) {
-                is PressInteraction.Press -> isPressed = true
-                is PressInteraction.Release, is PressInteraction.Cancel -> isPressed = false
+    // While expanded, BACK collapses the panel instead of closing the bar
+    DisposableEffect(expanded) {
+        if (expanded) {
+            val handler = {
+                expanded = false
+                true
             }
+            OverlayBackDispatcher.register(handler)
+            onDispose { OverlayBackDispatcher.unregister(handler) }
+        } else {
+            onDispose { }
         }
     }
 
@@ -203,48 +229,15 @@ fun MediaPlayerEntityCard(
 
     val uiState = rememberMediaPlayerUiState(entity)
 
-    val onBackgroundColor = when {
-        onStateColor.equals("custom", ignoreCase = true) && customOnStateColor != null && customOnStateColor.size >= 3 -> {
-            Color(android.graphics.Color.rgb(customOnStateColor[0].coerceIn(0, 255), customOnStateColor[1].coerceIn(0, 255), customOnStateColor[2].coerceIn(0, 255)))
-        }
-        onStateColor == "colorAmber500" -> colorResource(id = R.color.md_theme_Amber500)
-        onStateColor == "colorTertiary" -> colorResource(id = R.color.md_theme_tertiary)
-        onStateColor == "colorError"    -> colorResource(id = R.color.md_theme_error)
-        else                            -> colorResource(id = R.color.md_theme_primary)
-    }
+    val accentColor = resolveTileAccent(entity.id, onStateColor, customOnStateColor)
+    val accentContentColor = accentContentFor(accentColor)
 
-    fun contentFor(bg: Color): Color {
-        val luma = 0.299f*bg.red + 0.587f*bg.green + 0.114f*bg.blue
-        return if (luma > 0.6f) Color.Black else Color.White
-    }
+    val surfaceColor = colorResource(id = R.color.md_theme_surfaceVariant)
+    val onSurfaceColor = colorResource(id = R.color.md_theme_onSurface)
+    val disabledContentColor = onSurfaceColor.copy(alpha = 0.5f)
 
-    val onContentColor = when {
-        onStateColor.equals("custom", true) && customOnStateColor != null && customOnStateColor.size >= 3 -> contentFor(onBackgroundColor)
-        onStateColor == "colorAmber500" -> Color.Black
-        onStateColor == "colorTertiary" -> colorResource(id = R.color.md_theme_onTertiary)
-        onStateColor == "colorError"    -> colorResource(id = R.color.md_theme_onError)
-        else                            -> colorResource(id = R.color.md_theme_onPrimary)
-    }
-    
-    val offBackgroundColor = colorResource(id = R.color.md_theme_surfaceVariant)
-    val offContentColor = colorResource(id = R.color.md_theme_onSurface)
-    val disabledContentColor = offContentColor.copy(alpha = 0.35f)
-
-    val animatedBackgroundColor by animateColorAsState(
-        targetValue = when {
-            !uiState.isEnabled -> offBackgroundColor
-            uiState.isOn -> onBackgroundColor
-            else -> offBackgroundColor
-        },
-        animationSpec = tween(300, easing = FastOutSlowInEasing),
-        label = "mp_bg"
-    )
     val animatedContentColor by animateColorAsState(
-        targetValue = when {
-            !uiState.isEnabled -> disabledContentColor
-            uiState.isOn -> onContentColor
-            else -> offContentColor
-        },
+        targetValue = if (uiState.isEnabled) onSurfaceColor else disabledContentColor,
         animationSpec = tween(300, easing = FastOutSlowInEasing),
         label = "mp_fg"
     )
@@ -266,9 +259,30 @@ fun MediaPlayerEntityCard(
         }
     }
 
+    // Direct D-pad volume: local value updates instantly, sends are debounced.
+    val (localVolume, setLocalVolume) = rememberDebouncedAction(
+        initialValue = uiState.volumePercent ?: 0,
+        onSend = { v ->
+            if (haClient == null) return@rememberDebouncedAction
+            haClient.callService(
+                "media_player", "volume_set", entity.id,
+                JSONObject().put("volume_level", v / 100.0)
+            )
+        }
+    )
+    val canAdjustVolume = uiState.canSetVolume && uiState.volumePercent != null &&
+            uiState.isOn && uiState.isEnabled && adjustAxis != BarAdjustAxis.NONE
+    val adjustVolume: (Int) -> Unit = { direction ->
+        val next = (localVolume + direction * VolumeStepPercent).coerceIn(0, 100)
+        if (next != localVolume) setLocalVolume(next)
+    }
+
+    val fillFraction = if (canAdjustVolume) localVolume / 100f else 0f
+
     Card(
         modifier = modifier
             .focusRequester(cardFocusRequester)
+            .tvFocusFrame(isFocused && !expanded, TvTileShape)
             .combinedClickable(
                 enabled = !expanded && uiState.isEnabled,
                 interactionSource = interactionSource,
@@ -277,13 +291,14 @@ fun MediaPlayerEntityCard(
                 onLongClick = { handlePress(PressType.LONG) }
             )
             .focusable(enabled = !expanded, interactionSource = interactionSource)
+            .dpadAdjust(
+                enabled = !expanded && canAdjustVolume,
+                adjustVertically = adjustAxis == BarAdjustAxis.VERTICAL,
+                onAdjust = adjustVolume
+            )
             .bringIntoViewRequester(bringIntoViewRequester),
-        shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(
-            width = if (isFocused && !expanded) 3.dp else 0.dp,
-            color = if (isFocused && !expanded) Color.White else Color.Transparent
-        ),
-        colors = CardDefaults.cardColors(containerColor = animatedBackgroundColor, contentColor = animatedContentColor),
+        shape = TvTileShape,
+        colors = CardDefaults.cardColors(containerColor = surfaceColor, contentColor = animatedContentColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Box(
@@ -291,6 +306,28 @@ fun MediaPlayerEntityCard(
                 .animateContentSize(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing))
                 .fillMaxSize()
         ) {
+            // Value fill: live volume shown behind the content
+            if (!expanded && fillFraction > 0f) {
+                Box(modifier = Modifier.matchParentSize()) {
+                    if (isHorizontal) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .fillMaxWidth()
+                                .fillMaxHeight(fillFraction)
+                                .background(accentColor.copy(alpha = 0.35f))
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(fillFraction)
+                                .background(accentColor.copy(alpha = 0.35f))
+                        )
+                    }
+                }
+            }
+
             key(expanded) {
                 if (!isHorizontal) {
                     VerticalMediaContent(
@@ -300,7 +337,12 @@ fun MediaPlayerEntityCard(
                         expanded = expanded,
                         onClose = { expanded = false },
                         contentColor = animatedContentColor,
-                        backgroundColor = animatedBackgroundColor,
+                        backgroundColor = surfaceColor,
+                        accentColor = accentColor,
+                        accentContentColor = accentContentColor,
+                        isFocused = isFocused,
+                        canAdjustVolume = canAdjustVolume,
+                        localVolume = localVolume,
                         closeBtnFocusRequester = closeBtnFocusRequester
                     )
                 } else {
@@ -311,13 +353,28 @@ fun MediaPlayerEntityCard(
                         expanded = expanded,
                         onClose = { expanded = false },
                         contentColor = animatedContentColor,
-                        backgroundColor = animatedBackgroundColor,
+                        backgroundColor = surfaceColor,
+                        accentColor = accentColor,
+                        accentContentColor = accentContentColor,
+                        isFocused = isFocused,
+                        canAdjustVolume = canAdjustVolume,
+                        localVolume = localVolume,
                         closeBtnFocusRequester = closeBtnFocusRequester
                     )
                 }
             }
         }
     }
+}
+
+private fun mediaStateLine(uiState: MediaPlayerUiState, localVolume: Int): String {
+    val base = when {
+        !uiState.isEnabled -> uiState.state.replaceFirstChar { it.uppercase() }
+        else -> uiState.state.replaceFirstChar { it.uppercase() }
+    }
+    return if (uiState.isOn && uiState.isEnabled && uiState.canSetVolume && uiState.volumePercent != null) {
+        if (uiState.isMuted) "$base · Muted" else "$base · $localVolume%"
+    } else base
 }
 
 /**
@@ -403,40 +460,85 @@ private fun VerticalMediaContent(
     onClose: () -> Unit,
     contentColor: Color,
     backgroundColor: Color,
+    accentColor: Color,
+    accentContentColor: Color,
+    isFocused: Boolean,
+    canAdjustVolume: Boolean,
+    localVolume: Int,
     closeBtnFocusRequester: FocusRequester
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(painter = painterResource(uiState.iconRes), contentDescription = null, tint = contentColor, modifier = Modifier.size(32.dp))
-        Text(text = uiState.name, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(vertical = 2.dp))
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TileIconCircle(
+                iconRes = uiState.iconRes,
+                name = uiState.name,
+                active = uiState.isOn && uiState.isEnabled,
+                accentColor = accentColor,
+                accentContentColor = accentContentColor,
+                contentColor = contentColor
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)
+            ) {
+                Text(
+                    text = uiState.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = mediaStateLine(uiState, localVolume),
+                    fontSize = 12.sp,
+                    color = contentColor.copy(alpha = 0.65f)
+                )
+            }
+
+            if (!expanded && isFocused && canAdjustVolume) {
+                // Adjust affordance: ‹ value › while focused
+                Text(text = "‹", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "$localVolume%",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 6.dp)
+                )
+                Text(text = "›", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            }
+        }
 
         if (expanded) {
-            Spacer(Modifier.height(8.dp))
-            HorizontalDivider(color = contentColor.copy(alpha = 0.2f))
-            Spacer(Modifier.height(8.dp))
-
-            MediaControlsSection(entity = entity, uiState = uiState, haClient = haClient, contentColor = contentColor, backgroundColor = backgroundColor)
-
-            Spacer(Modifier.height(10.dp))
-            PowerButton(contentColor = contentColor, backgroundColor = backgroundColor, onClick = { haClient?.callService("media_player", "toggle", entity.id) }, isOn = uiState.isOn)
-
-            Spacer(Modifier.height(8.dp))
-            val closeIsrc = remember { MutableInteractionSource() }
-            val closeFocused by closeIsrc.collectIsFocusedAsState()
-            Box(
+            Column(
                 modifier = Modifier
-                    .focusRequester(closeBtnFocusRequester)
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(if (closeFocused) contentColor else contentColor.copy(alpha = AlphaLow))
-                    .border(width = if (closeFocused) 2.dp else 1.dp, color = if (closeFocused) contentColor else contentColor.copy(alpha = AlphaMedium), shape = CircleShape)
-                    .clickable(interactionSource = closeIsrc, indication = ripple(), onClick = onClose)
-                    .focusable(interactionSource = closeIsrc),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = if (closeFocused) backgroundColor else contentColor, modifier = Modifier.size(24.dp))
+                HorizontalDivider(color = contentColor.copy(alpha = 0.2f))
+                Spacer(Modifier.height(8.dp))
+
+                MediaControlsSection(entity = entity, uiState = uiState, haClient = haClient, contentColor = contentColor, backgroundColor = backgroundColor)
+
+                Spacer(Modifier.height(10.dp))
+                PowerButton(contentColor = contentColor, backgroundColor = backgroundColor, onClick = { haClient?.callService("media_player", "toggle", entity.id) }, isOn = uiState.isOn)
+
+                Spacer(Modifier.height(8.dp))
+                CloseCircleButton(
+                    focusRequester = closeBtnFocusRequester,
+                    contentColor = contentColor,
+                    backgroundColor = backgroundColor,
+                    onClose = onClose,
+                    size = 40.dp
+                )
+                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -451,13 +553,18 @@ private fun HorizontalMediaContent(
     onClose: () -> Unit,
     contentColor: Color,
     backgroundColor: Color,
+    accentColor: Color,
+    accentContentColor: Color,
+    isFocused: Boolean,
+    canAdjustVolume: Boolean,
+    localVolume: Int,
     closeBtnFocusRequester: FocusRequester
 ) {
     Row(
         modifier = Modifier
-            .height(160.dp)
+            .heightIn(min = 150.dp)
             .then(if (expanded) Modifier.width(360.dp) else Modifier.width(120.dp))
-            .clip(RoundedCornerShape(8.dp))
+            .clip(TvTileShape)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -467,10 +574,25 @@ private fun HorizontalMediaContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(painter = painterResource(uiState.iconRes), contentDescription = null, tint = contentColor, modifier = Modifier.size(32.dp))
+            TileIconCircle(
+                iconRes = uiState.iconRes,
+                name = uiState.name,
+                active = uiState.isOn && uiState.isEnabled,
+                accentColor = accentColor,
+                accentContentColor = accentContentColor,
+                contentColor = contentColor
+            )
+            Spacer(Modifier.height(6.dp))
             Text(text = uiState.name, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(vertical = 2.dp))
-            if (uiState.state.isNotBlank()) {
-                Text(uiState.state.replaceFirstChar { it.uppercase() }, fontSize = 11.sp)
+            if (!expanded && isFocused && canAdjustVolume) {
+                Text(text = "▴ $localVolume% ▾", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            } else if (uiState.state.isNotBlank()) {
+                Text(
+                    text = mediaStateLine(uiState, localVolume),
+                    fontSize = 11.sp,
+                    color = contentColor.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
@@ -490,24 +612,41 @@ private fun HorizontalMediaContent(
                 ) {
                     PowerButton(contentColor = contentColor, backgroundColor = backgroundColor, onClick = { haClient?.callService("media_player", "toggle", entity.id) }, isOn = uiState.isOn, size = 36.dp)
 
-                    val closeIsrc = remember { MutableInteractionSource() }
-                    val closeFocused by closeIsrc.collectIsFocusedAsState()
-                    Box(
-                        modifier = Modifier
-                            .focusRequester(closeBtnFocusRequester)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(if (closeFocused) contentColor else contentColor.copy(alpha = AlphaLow))
-                            .border(width = if (closeFocused) 2.dp else 1.dp, color = if (closeFocused) contentColor else contentColor.copy(alpha = AlphaMedium), shape = CircleShape)
-                            .clickable(interactionSource = closeIsrc, indication = ripple(), onClick = onClose)
-                            .focusable(interactionSource = closeIsrc),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = if (closeFocused) backgroundColor else contentColor, modifier = Modifier.size(20.dp))
-                    }
+                    CloseCircleButton(
+                        focusRequester = closeBtnFocusRequester,
+                        contentColor = contentColor,
+                        backgroundColor = backgroundColor,
+                        onClose = onClose,
+                        size = 36.dp
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CloseCircleButton(
+    focusRequester: FocusRequester,
+    contentColor: Color,
+    backgroundColor: Color,
+    onClose: () -> Unit,
+    size: Dp
+) {
+    val closeIsrc = remember { MutableInteractionSource() }
+    val closeFocused by closeIsrc.collectIsFocusedAsState()
+    Box(
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .size(size)
+            .clip(CircleShape)
+            .background(if (closeFocused) contentColor else contentColor.copy(alpha = AlphaLow))
+            .border(width = if (closeFocused) 2.dp else 1.dp, color = if (closeFocused) contentColor else contentColor.copy(alpha = AlphaMedium), shape = CircleShape)
+            .clickable(interactionSource = closeIsrc, indication = ripple(), onClick = onClose)
+            .focusable(interactionSource = closeIsrc),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = if (closeFocused) backgroundColor else contentColor, modifier = Modifier.size(size * 0.6f))
     }
 }
 
