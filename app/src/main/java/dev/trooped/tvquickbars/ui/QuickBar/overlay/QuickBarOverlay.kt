@@ -7,6 +7,10 @@ package dev.trooped.tvquickbars.ui.QuickBar.overlay
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,6 +21,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,12 +32,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.trooped.tvquickbars.R
@@ -274,34 +278,61 @@ fun QuickBarOverlay(
 }
 
 /**
- * Displays a banner indicating a connection error to Home Assistant.
+ * A quiet banner shown while the bar cannot reach Home Assistant.
  *
- * @param message The error message to be displayed within the banner.
+ * Deliberately low-key (amber pulse dot + one line of text) rather than a full error
+ * surface: the bar keeps showing the last known entity states and the service retries
+ * on its own, so this is a status, not a dead end.
+ *
+ * @param message The connection status to display.
  */
 @Composable
 fun ConnectionErrorBanner(message: String) {
+    val amber = Color(0xFFFFB74D)
+
+    val pulse = rememberInfiniteTransition(label = "connPulse")
+    val dotAlpha by pulse.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "connDotAlpha"
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .background(
-                colorResource(id = R.color.md_theme_errorContainer),
-                shape = RoundedCornerShape(4.dp)
+                amber.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(10.dp)
             )
-            .padding(8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Error",
-            tint = colorResource(id = R.color.md_theme_onErrorContainer),
-            modifier = Modifier.size(20.dp)
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(amber.copy(alpha = dotAlpha), shape = CircleShape)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = message,
             style = MaterialTheme.typography.bodySmall,
-            color = colorResource(id = R.color.md_theme_onErrorContainer),
-            fontSize = 12.sp
+            color = colorResource(id = R.color.md_theme_onSurface).copy(alpha = 0.85f),
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = "Retrying…",
+            style = MaterialTheme.typography.bodySmall,
+            color = colorResource(id = R.color.md_theme_onSurface).copy(alpha = 0.55f),
+            fontSize = 11.sp
         )
     }
 }
