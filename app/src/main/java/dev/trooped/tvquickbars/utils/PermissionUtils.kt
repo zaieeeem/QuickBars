@@ -61,7 +61,7 @@ object PermissionUtils {
                         return true
                     }
                     else{
-                        Toast.makeText(context, "Please go to system settings again, disable and re-enable the accessibility setting for QuickBars", Toast.LENGTH_LONG)
+                        Toast.makeText(context, "Please go to system settings again, disable and re-enable the accessibility setting for Bing-Bong", Toast.LENGTH_LONG)
                             .show()
                     }
                 }
@@ -292,7 +292,7 @@ object PermissionUtils {
                     activity.startActivity(fallbackIntent)
                     Toast.makeText(
                         activity,
-                        "Please navigate to: Settings → Apps → Special app access → Draw over other apps → enable QuickBars",
+                        "Please navigate to: Settings → Apps → Special app access → Draw over other apps → enable Bing-Bong",
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
@@ -350,7 +350,7 @@ object PermissionUtils {
                     activity.startActivity(fallbackIntent)
                     Toast.makeText(
                         activity,
-                        "Please navigate to: Settings → Device Preferences → Accessibility and enable QuickBars",
+                        "Please navigate to: Settings → Device Preferences → Accessibility and enable Bing-Bong",
                         Toast.LENGTH_LONG
                     ).show()
                 } else {

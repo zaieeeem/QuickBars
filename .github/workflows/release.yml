@@ -50,12 +50,12 @@ jobs:
             -PHA_QUICKBARS_KEYSTORE_FILE="$GITHUB_WORKSPACE/.ci/quickbars-ci.jks"
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk "QuickBars-${{ steps.version.outputs.name }}.apk"
+        run: cp app/build/outputs/apk/release/app-release.apk "BingBong-${{ steps.version.outputs.name }}.apk"
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.name }}
-          name: QuickBars ${{ steps.version.outputs.name }}
+          name: Bing-Bong ${{ steps.version.outputs.name }}
           generate_release_notes: true
-          files: QuickBars-*.apk
+          files: BingBong-*.apk
