@@ -495,7 +495,7 @@ fun TVFriendlyNavigation(
                                 Box(contentAlignment = Alignment.Center) {
                                     Image(
                                         painter = painterResource(id = R.mipmap.ic_icon_foreground),
-                                        contentDescription = "QuickBars",
+                                        contentDescription = "Bing-Bong",
                                         modifier = Modifier
                                             .fillMaxSize()
                                             // Add a graphicsLayer to manually scale the image up
@@ -514,7 +514,7 @@ fun TVFriendlyNavigation(
 
                             Column {
                                 Text(
-                                    text = "QuickBars",
+                                    text = "Bing-Bong",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )

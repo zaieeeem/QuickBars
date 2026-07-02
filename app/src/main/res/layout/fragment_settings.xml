@@ -499,7 +499,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="QuickBars Plus"
+                                android:text="Bing-Bong Plus"
                                 android:textColor="@color/md_theme_onSurface"
                                 android:textAppearance="?attr/textAppearanceBodyMedium"/>
 
@@ -544,7 +544,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Enjoying QuickBars? A quick rating or review really helps others discover it and supports my work on the app."
+                        android:text="Enjoying Bing-Bong? A quick rating or review really helps others discover it and supports my work on the app."
                         android:layout_marginBottom="8dp"
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
@@ -556,7 +556,7 @@
                         android:layout_height="wrap_content"
                         android:minHeight="42dp"
                         android:text="Rate &amp; review on Google Play"
-                        android:contentDescription="Rate and review QuickBars on Google Play"
+                        android:contentDescription="Rate and review Bing-Bong on Google Play"
                         app:iconSize="18dp"
                         app:cornerRadius="16dp"
                         android:focusable="true"/>
@@ -580,7 +580,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Want to say thanks? These don’t unlock anything, they just support me and my work on QuickBars."
+                        android:text="Want to say thanks? These don’t unlock anything, they just support me and my work on Bing-Bong."
                         android:layout_marginBottom="8dp"
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         android:textColor="?attr/colorOnSurfaceVariant"/>

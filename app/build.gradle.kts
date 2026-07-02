@@ -5,11 +5,17 @@ plugins {
 }
 
 android {
+    // Code namespace stays dev.trooped.tvquickbars (upstream packages, no user-visible
+    // impact); only the shipped application id is rebranded.
     namespace = "dev.trooped.tvquickbars"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.trooped.tvquickbars"
+        // Bing-Bong's own Play identity. NOTE: this permanently forks the app's
+        // identity -- Play treats com.zaiemv.bingbong as a different app from
+        // upstream's dev.trooped.tvquickbars, forever. Never change it again
+        // after the first Play upload.
+        applicationId = "com.zaiemv.bingbong"
         minSdk = 28
         targetSdk = 35
         // CI overrides these via -PciVersionCode / -PciVersionName when publishing
