@@ -1,7 +1,7 @@
 name: Release
 
-# Publishes a signed APK as a GitHub release on every push to main, so update
-# managers like Obtainium can track this repository and install updates.
+# Publishes a signed APK (for Obtainium) and a signed AAB (for Google Play
+# internal testing) as a GitHub release on every push to main.
 
 on:
   push:
@@ -35,22 +35,25 @@ jobs:
           echo "name=${BASE}-r${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
           echo "code=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
 
-      - name: Build signed release APK
+      - name: Build signed release APK + AAB
         env:
           # Defaults match the committed CI keystore; define repository secrets
-          # with the same names to switch to a private keystore.
+          # with the same names to switch to a private keystore. This keystore
+          # is the Play UPLOAD key — CI must keep using it for every release.
           HA_QUICKBARS_KEYSTORE_PASSWORD: ${{ secrets.HA_QUICKBARS_KEYSTORE_PASSWORD || 'quickbars-ci' }}
           HA_QUICKBARS_KEY_ALIAS: ${{ secrets.HA_QUICKBARS_KEY_ALIAS || 'quickbars-ci' }}
           HA_QUICKBARS_KEY_PASSWORD: ${{ secrets.HA_QUICKBARS_KEY_PASSWORD || 'quickbars-ci' }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease \
+          ./gradlew assembleRelease bundleRelease \
             -PciVersionCode=${{ steps.version.outputs.code }} \
             -PciVersionName=${{ steps.version.outputs.name }} \
             -PHA_QUICKBARS_KEYSTORE_FILE="$GITHUB_WORKSPACE/.ci/quickbars-ci.jks"
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk "BingBong-${{ steps.version.outputs.name }}.apk"
+      - name: Rename artifacts
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "BingBong-${{ steps.version.outputs.name }}.apk"
+          cp app/build/outputs/bundle/release/app-release.aab "BingBong-${{ steps.version.outputs.name }}.aab"
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -58,4 +61,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.name }}
           name: Bing-Bong ${{ steps.version.outputs.name }}
           generate_release_notes: true
-          files: BingBong-*.apk
+          files: |
+            BingBong-*.apk
+            BingBong-*.aab
