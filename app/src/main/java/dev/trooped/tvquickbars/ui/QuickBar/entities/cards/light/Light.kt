@@ -69,8 +69,12 @@ import dev.trooped.tvquickbars.ui.QuickBar.foundation.BarAdjustAxis
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.LocalBarAdjustAxis
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.OverlayBackDispatcher
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.SafePainterResource
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.TileIconCircle
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.accentContentFor
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.dpadAdjust
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.getTypeSafe
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.rememberDebouncedAction
+import dev.trooped.tvquickbars.ui.QuickBar.foundation.resolveTileAccent
 import dev.trooped.tvquickbars.ui.QuickBar.foundation.tvFocusFrame
 import dev.trooped.tvquickbars.utils.EntityActionExecutor
 import kotlinx.coroutines.Dispatchers
@@ -111,50 +115,6 @@ data class LightUiState(
     val supportsColorTemp: Boolean,
     val supportsRgbColor: Boolean
 )
-
-/**
- * A helper function that debounces updates to a state value, primarily used for UI controls
- * (like sliders or color pickers) that trigger frequent network calls.
- *
- * It maintains a local state that updates immediately for a responsive UI, while delaying
- * the execution of the [onSend] callback until the user has stopped interacting for [delayMs].
- *
- * @param T The type of value being managed.
- * @param initialValue The starting value, typically synchronized with the external entity state.
- * @param delayMs The debounce timeout in milliseconds. Defaults to 180ms.
- * @param onSend The callback to execute after the debounce delay (e.g., calling a Home Assistant service).
- * @return A [Pair] containing the current local value and a function to update that value.
- */
-@Composable
-fun <T> rememberDebouncedAction(
-    initialValue: T,
-    delayMs: Long = 180L,
-    onSend: (T) -> Unit
-): Pair<T, (T) -> Unit> {
-    val scope = rememberCoroutineScope()
-    var isChanging by remember { mutableStateOf(false) }
-    var sendJob by remember { mutableStateOf<Job?>(null) }
-    var localValue by remember(initialValue) { mutableStateOf(initialValue) }
-
-    LaunchedEffect(initialValue) {
-        if (!isChanging) {
-            localValue = initialValue
-        }
-    }
-
-    val updateValue: (T) -> Unit = { newValue ->
-        isChanging = true
-        localValue = newValue
-        sendJob?.cancel()
-        sendJob = scope.launch {
-            delay(delayMs)
-            isChanging = false
-            onSend(newValue)
-        }
-    }
-
-    return localValue to updateValue
-}
 
 /**
  * Remembers and computes the [LightUiState] for a given light entity.
@@ -345,16 +305,8 @@ private fun LightTile(
         supportsRgbColor = supportsRgbColor
     )
 
-    val accentColor = when {
-        onStateColor.equals("custom", ignoreCase = true) && customOnStateColor != null && customOnStateColor.size >= 3 -> {
-            Color(android.graphics.Color.rgb(customOnStateColor[0].coerceIn(0, 255), customOnStateColor[1].coerceIn(0, 255), customOnStateColor[2].coerceIn(0, 255)))
-        }
-        onStateColor == "colorAmber500" -> colorResource(id = R.color.md_theme_Amber500)
-        onStateColor == "colorTertiary" -> colorResource(id = R.color.md_theme_tertiary)
-        onStateColor == "colorError"    -> colorResource(id = R.color.md_theme_error)
-        else                            -> colorResource(id = R.color.md_theme_primary)
-    }
-    val accentContentColor = lightContentFor(accentColor)
+    val accentColor = resolveTileAccent(entity.id, onStateColor, customOnStateColor)
+    val accentContentColor = accentContentFor(accentColor)
 
     val surfaceColor = colorResource(id = R.color.md_theme_surfaceVariant)
     val onSurfaceColor = colorResource(id = R.color.md_theme_onSurface)
@@ -549,32 +501,6 @@ private fun LightTile(
     }
 }
 
-@Composable
-private fun IconCircle(
-    iconRes: Int,
-    name: String,
-    active: Boolean,
-    accentColor: Color,
-    accentContentColor: Color,
-    contentColor: Color,
-    size: androidx.compose.ui.unit.Dp = 36.dp
-) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(if (active) accentColor else contentColor.copy(alpha = 0.1f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = SafePainterResource(id = iconRes),
-            contentDescription = name,
-            modifier = Modifier.size(size * 0.55f),
-            colorFilter = ColorFilter.tint(if (active) accentContentColor else contentColor)
-        )
-    }
-}
-
 private fun stateLine(isEnabled: Boolean, isOn: Boolean, supportsBrightness: Boolean, brightness: Int, rawState: String): String = when {
     !isEnabled -> rawState
     isOn && supportsBrightness -> "On · $brightness%"
@@ -603,7 +529,7 @@ private fun VerticalTileContent(
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor)
+        TileIconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor)
 
         Column(
             modifier = Modifier
@@ -662,7 +588,7 @@ private fun HorizontalTileContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        IconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor)
+        TileIconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor)
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = uiState.name,
@@ -714,7 +640,7 @@ private fun ExpandedLightControls(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor, size = 32.dp)
+            TileIconCircle(iconRes, uiState.name, isOn, accentColor, accentContentColor, contentColor, size = 32.dp)
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -979,10 +905,4 @@ private fun ColorDot(color: Color?, outline: Color, size: androidx.compose.ui.un
             .background(dot)
             .border(1.dp, outline.copy(alpha = 0.6f), CircleShape)
     )
-}
-
-/** Simple luma heuristic (sRGB) to select black/white for readability */
-private fun lightContentFor(bg: Color): Color {
-    val luma = 0.299f * bg.red + 0.587f * bg.green + 0.114f * bg.blue
-    return if (luma > 0.6f) Color.Black else Color.White
 }

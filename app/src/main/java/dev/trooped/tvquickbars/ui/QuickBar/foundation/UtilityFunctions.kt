@@ -8,9 +8,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -22,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import dev.trooped.tvquickbars.R
 import dev.trooped.tvquickbars.data.EntityItem
 import dev.trooped.tvquickbars.ui.EntityIconMapper
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -182,4 +189,49 @@ fun <T> Map<String, Any?>.getTypeSafe(key: String, defaultValue: T): T {
  */
 fun getEntityType(entity: EntityItem): String {
     return entity.id.split('.').first()
+}
+
+
+/**
+ * A helper function that debounces updates to a state value, primarily used for UI controls
+ * (like sliders or D-pad value ramps) that trigger frequent network calls.
+ *
+ * It maintains a local state that updates immediately for a responsive UI, while delaying
+ * the execution of the [onSend] callback until the user has stopped interacting for [delayMs].
+ *
+ * @param T The type of value being managed.
+ * @param initialValue The starting value, typically synchronized with the external entity state.
+ * @param delayMs The debounce timeout in milliseconds. Defaults to 180ms.
+ * @param onSend The callback to execute after the debounce delay (e.g., calling a Home Assistant service).
+ * @return A [Pair] containing the current local value and a function to update that value.
+ */
+@Composable
+fun <T> rememberDebouncedAction(
+    initialValue: T,
+    delayMs: Long = 180L,
+    onSend: (T) -> Unit
+): Pair<T, (T) -> Unit> {
+    val scope = rememberCoroutineScope()
+    var isChanging by remember { mutableStateOf(false) }
+    var sendJob by remember { mutableStateOf<Job?>(null) }
+    var localValue by remember(initialValue) { mutableStateOf(initialValue) }
+
+    LaunchedEffect(initialValue) {
+        if (!isChanging) {
+            localValue = initialValue
+        }
+    }
+
+    val updateValue: (T) -> Unit = { newValue ->
+        isChanging = true
+        localValue = newValue
+        sendJob?.cancel()
+        sendJob = scope.launch {
+            delay(delayMs)
+            isChanging = false
+            onSend(newValue)
+        }
+    }
+
+    return localValue to updateValue
 }
