@@ -1,7 +1,7 @@
 <resources>
     <!-- General & App Titles -->
-    <string name="app_name_full">QuickBars for Home Assistant</string>
-    <string name="app_name_short">QuickBars</string>
+    <string name="app_name_full">Bing-Bong for Home Assistant</string>
+    <string name="app_name_short">Bing-Bong</string>
     <string name="entity_select_title">Select Entities</string>
 
     <!-- Onboarding & Setup -->
@@ -25,7 +25,7 @@
     <string name="num_3">3</string>
     <string name="scroll_down_to_long_lived_access_tokens">Scroll down to \'Long-Lived Access Tokens\'</string>
     <string name="num_4">4</string>
-    <string name="create_a_new_token_named_quickbars_or_any_name_you_prefer">Create a new token named \'QuickBars\' (or any name you prefer)</string>
+    <string name="create_a_new_token_named_quickbars_or_any_name_you_prefer">Create a new token named \'Bing-Bong\' (or any name you prefer)</string>
     <string name="num_5">5</string>
     <string name="copy_the_token_and_write_it_here_manually_or_use_paste_from_phone_to_make_it_easier">Copy the token and paste it via the easy setup link, or write it manually</string>
     <string name="num_6">6</string>
@@ -37,7 +37,7 @@
 
     <!-- Permissions -->
     <string name="permission_accessibility_title">Accessibility Permission Needed</string>
-    <string name="permission_accessibility_explanation">To detect remote control buttons, please enable the QuickBars service in your system\'s Accessibility settings.</string>
+    <string name="permission_accessibility_explanation">To detect remote control buttons, please enable the Bing-Bong service in your system\'s Accessibility settings.</string>
     <string name="permission_button_open_accessibility">Open Accessibility Settings</string>
     <string name="permission_overlay_title">One Last Step!</string>
     <string name="permission_overlay_explanation">To display the QuickBar over other apps, please grant the overlay permission.</string>
@@ -107,13 +107,13 @@
     <string name="settings_description_accessibility_permission">Required for sidebar functionality</string>
     <string name="settings_section_about">About</string>
     <string name="about_app_version">Version %1$s</string>
-    <string name="about_app_description">Home Assistant quick controls for Android TV.\nTo learn more, visit quickbars.app</string>
+    <string name="about_app_description">Home Assistant quick controls for Android TV.\n\nBing-Bong is free software (GPL-3.0), based on QuickBars by Omri Peretz (github.com/Trooped/QuickBars).\nSource code: github.com/zaieeeem/QuickBars</string>
 
 
     <!-- Miscellaneous & Error Messages -->
     <string name="common_error_generic">An error occurred</string>
     <string name="common_action_dismiss">Dismiss</string>
-    <string name="accessibility_service_description">This service allows QuickBars to detect remote control button presses to launch your QuickBars from any screen.</string>
+    <string name="accessibility_service_description">This service allows Bing-Bong to detect remote control button presses to launch your quick bars from any screen.</string>
     <string name="common_label_entity_id">Entity ID</string>
     <string name="reorder_screen_instruction">Select an item and press CENTER to toggle move mode</string>
     <string name="reorder_screen_empty_message">No entities to reorder</string>
@@ -127,23 +127,23 @@
 
     <!-- Special Permissions Strings -->
     <string name="overlay_permission_title">Enable QuickBar Overlay</string>
-    <string name="overlay_permission_explanation">To display your QuickBars on top of other apps, QuickBars requires the \"Display over other apps\" permission in system settings.\n\nThis is a core feature of the app and is only used to display the QuickBar when you activate a trigger key.</string>
-    <string name="overlay_permission_denied_message">QuickBars won\'t appear over other apps</string>
-    <string name="overlay_permission_reminder">\"Display over other apps\" permission is required to display QuickBars</string>
-    <string name="overlay_settings_toast">Find QuickBars in the list and enable it</string>
-    <string name="overlay_banner_title">QuickBars Overlay Feature Requires Permission</string>
-    <string name="overlay_banner_message">To let QuickBars appear on top of other apps, the \"Display over other apps\" permission is required.</string>
+    <string name="overlay_permission_explanation">To display your quick bars on top of other apps, Bing-Bong requires the \"Display over other apps\" permission in system settings.\n\nThis is a core feature of the app and is only used to display the QuickBar when you activate a trigger key.</string>
+    <string name="overlay_permission_denied_message">Quick bars won\'t appear over other apps</string>
+    <string name="overlay_permission_reminder">\"Display over other apps\" permission is required to display quick bars</string>
+    <string name="overlay_settings_toast">Find Bing-Bong in the list and enable it</string>
+    <string name="overlay_banner_title">Bing-Bong Overlay Feature Requires Permission</string>
+    <string name="overlay_banner_message">To let Bing-Bong appear on top of other apps, the \"Display over other apps\" permission is required.</string>
 
     <string name="accessibility_permission_title">Enable Trigger Key Service</string>
-    <string name="accessibility_permission_explanation">To use your remote control buttons as trigger keys, QuickBars requires permission to listen for key presses. This is handled by Android\'s Accessibility Service. \nPlease enable "QuickBars" in accessibility settings to activate your trigger keys.</string>
+    <string name="accessibility_permission_explanation">To use your remote control buttons as trigger keys, Bing-Bong requires permission to listen for key presses. This is handled by Android\'s Accessibility Service. \nPlease enable "Bing-Bong" in accessibility settings to activate your trigger keys.</string>
     <string name="accessibility_permission_denied_message">Trigger keys won\'t respond to remote buttons</string>
     <string name="accessibility_permission_reminder">Accessibility Service is required for trigger keys to work.</string>
-    <string name="accessibility_settings_toast">Scroll down to \"SERVICES\", find QuickBars and enable it</string>
+    <string name="accessibility_settings_toast">Scroll down to \"SERVICES\", find Bing-Bong and enable it</string>
     <string name="accessibility_banner_title">Trigger Keys Require Permission</string>
     <string name="accessibility_banner_message">To allow remote buttons to work as trigger keys, the Accessibility Service must be enabled in settings.</string>
 
     <string name="accessibility_more_info_title">About Accessibility Service</string>
-    <string name="accessibility_more_info_message"><b>What This Permission Allows QuickBars to Do:</b>
+    <string name="accessibility_more_info_message"><b>What This Permission Allows Bing-Bong to Do:</b>
 \n\n• Listen for physical button presses from your remote control.
 \n• Let you assign a new remote button by capturing it in the trigger setup screen.
 \n• Activate your actions (like displaying a QuickBar or toggling a light) when a configured trigger is detected.
@@ -156,7 +156,7 @@
 
 \n\nThe app only uses this service for its core "trigger key" feature and has been declared to Google as a tool for general users, not one intended for disability assistance.</string>
 
-    <string name="settings_navigation_error">Unable to open overlay settings. Please navigate manually: Settings > Apps > Special app access > Draw over other apps and enable QuickBars</string>
+    <string name="settings_navigation_error">Unable to open overlay settings. Please navigate manually: Settings > Apps > Special app access > Draw over other apps and enable Bing-Bong</string>
     <string name="go_to_settings">Go to Settings</string>
     <string name="not_now">Not Now</string>
     <string name="more_info">More Info</string>
@@ -168,9 +168,9 @@
     <string name="play_store_accessibility_disclosure">
     This app uses the Accessibility Service API to provide its core functionality.
     The Accessibility Service is required to detect and intercept specific hardware key presses (e.g., from your remote control) that you configure as "trigger keys."
-    This allows the app to launch your QuickBar or control your Home Assistant devices even when the app is in the background.
+    This allows the app to launch your quick bars or control your Home Assistant devices even when the app is in the background.
 
-    QuickBars does not use the Accessibility Service to collect any user data, see your personal information, or read the content of your screen. It is used solely for the key press trigger feature.
+    Bing-Bong does not use the Accessibility Service to collect any user data, see your personal information, or read the content of your screen. It is used solely for the key press trigger feature.
 </string>
     <string name="show_time_on_quickbar">Show time on QuickBar</string>
     <string name="settings_button_manage_pairing">Manage HA Integration</string>

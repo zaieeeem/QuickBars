@@ -170,7 +170,7 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
         rateAppButton.setOnClickListener {
             // Build the dialog first so we can set an OnShowListener before showing
             val dlg = MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Rate & review QuickBars?")
+                .setTitle("Rate & review Bing-Bong?")
                 .setMessage("This opens Google Play so you can leave a rating or review.")
                 .setNegativeButton("Cancel", null) // Cancel first for DPAD users
                 .setPositiveButton("Open Google Play") { _, _ ->
@@ -323,7 +323,7 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
         val pm  = ctx.packageManager
 
         // Hardcoded for your debug testing
-        val packageName = "dev.trooped.tvquickbars"
+        val packageName = "com.zaiemv.bingbong"
 
         fun Intent.withCommonFlags() = apply {
             // Safe, simple back stack behavior from fragments/activities

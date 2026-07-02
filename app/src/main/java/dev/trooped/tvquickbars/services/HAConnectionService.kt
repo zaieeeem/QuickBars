@@ -110,7 +110,7 @@ class HAConnectionService : LifecycleService() {
     private fun makeChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val ch = NotificationChannel(channelId, "HA QuickBars", NotificationManager.IMPORTANCE_MIN)
+            val ch = NotificationChannel(channelId, "Bing-Bong background connection", NotificationManager.IMPORTANCE_MIN)
             ch.setShowBadge(false)
             nm.createNotificationChannel(ch)
         }
@@ -119,7 +119,7 @@ class HAConnectionService : LifecycleService() {
     private fun buildNotification(text: String): Notification {
         return NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.icon_svg)
-            .setContentTitle("QuickBars")
+            .setContentTitle("Bing-Bong")
             .setContentText(text)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

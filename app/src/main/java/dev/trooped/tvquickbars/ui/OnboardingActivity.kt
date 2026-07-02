@@ -245,7 +245,7 @@ private fun OnboardingScreen() {
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.icon_svg),
-                    contentDescription = "QuickBars Icon",
+                    contentDescription = "Bing-Bong Icon",
                     // size animates with welcomeScale, so layout height tracks the icon
                     modifier = Modifier
                         .size(280.dp * welcomeScale)
@@ -256,7 +256,7 @@ private fun OnboardingScreen() {
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "Welcome to QuickBars for Home Assistant",
+                    text = "Welcome to Bing-Bong for Home Assistant",
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontSize = 42.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -376,7 +376,7 @@ private fun OnboardingScreen() {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_svg),
-                contentDescription = "QuickBars Icon",
+                contentDescription = "Bing-Bong Icon",
                 // size animates with welcomeScale, so layout height tracks the icon
                 modifier = Modifier
                     .size(72.dp),

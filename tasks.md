@@ -1,6 +1,6 @@
 ---
 type: tasks
-title: QuickBars tasks
+title: Bing-Bong (QuickBars fork) tasks
 description: TV-experience fork roadmap (remote-first UX + 10-foot design)
 timestamp: 2026-07-02T00:00:00Z
 resource: https://github.com/zaieeeem/QuickBars
@@ -10,9 +10,18 @@ resource: https://github.com/zaieeeem/QuickBars
 
 ## In progress
 
+- [ ] Review + merge PR `feat/bingbong-rebrand` (stacked on `feat/tv-experience`: Play identity, icon/banner, GPL attribution, play-listing kit) — started 2026-07-02
 - [ ] Review + merge PR `feat/tv-experience` (shared tile foundation, generic tile redesign, media volume D-pad adjust, quiet reconnect banner) — started 2026-07-02
 
 ## Up next
+
+Play publication (see [docs/play-listing.md](docs/play-listing.md) for the full checklist):
+
+- [ ] **Make the repo public (or publish a source mirror) — GPLv3 blocker before any Play binary**
+- [ ] New private upload keystore + Play App Signing (committed `.ci/quickbars-ci.jks` is public — never for Play)
+- [ ] Billing decision: wire RevenueCat/Play products for `com.zaiemv.bingbong` or strip the Plus flow
+- [ ] Create the Play Console app (Bing-Bong / com.zaiemv.bingbong), manual first AAB, TV track + declarations
+- [ ] Capture 2+ TV screenshots (1920x1080) for the listing
 
 Overlay redesign phase 4 (see [the design doc](docs/design/overlay-redesign.md) — the shared
 `dpadAdjust`/`rememberDebouncedAction`/`TileIconCircle` foundation is in place, so each
@@ -34,6 +43,7 @@ Phase 5-6 + polish:
 
 ## Done
 
+- [x] Bing-Bong rebrand: app label + `com.zaiemv.bingbong` id, desk-bell icon/banner set (`scripts/gen_brand_assets.py`), GPL attribution (README + About), docs/play-listing.md — 2026-07-02
 - [x] Overlay redesign doc + mockups (docs/design/overlay-redesign.md)
 - [x] Phase 1-3: TvTile foundation (focus frame, dpadAdjust, back dispatcher), direct-manipulation light tile, entity selector search
 - [x] Shared tile foundation: domain accents, TileIconCircle, rememberDebouncedAction moved to foundation — 2026-07-02

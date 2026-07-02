@@ -659,7 +659,7 @@ fun EntityImporterScreen(
         is EntityImporterViewModel.DialogState.FirstTimeSetupChoice -> {
             AlertDialog(
                 onDismissRequest = { viewModel.dismissDialog() },
-                title = { Text("Welcome to QuickBars") },
+                title = { Text("Welcome to Bing-Bong") },
                 text = {
                     Column {
                         Text("Would you like to restore your settings from a backup or start fresh?")
