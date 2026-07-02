@@ -29,7 +29,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Upgrade to QuickBars Plus"
+            android:text="Upgrade to Bing-Bong Plus"
             android:textColor="@color/md_theme_onSurface"
             android:textAlignment="center"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
