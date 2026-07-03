@@ -32,9 +32,7 @@ import dev.trooped.tvquickbars.persistence.AppPrefs
 import dev.trooped.tvquickbars.persistence.QuickBarManager
 import dev.trooped.tvquickbars.persistence.TriggerKeyManager
 import dev.trooped.tvquickbars.services.QuickBarService
-import dev.trooped.tvquickbars.utils.DemoModeManager
 import dev.trooped.tvquickbars.utils.PermissionUtils
-import dev.trooped.tvquickbars.utils.PlusStatusManager
 import java.util.Locale
 
 const val MAX_LEN_QUICKBAR_NAME = 20
@@ -117,35 +115,6 @@ class QuickBarEditorActivity : BaseActivity() {
     private val positionButtonListener: MaterialButtonToggleGroup.OnButtonCheckedListener =
         MaterialButtonToggleGroup.OnButtonCheckedListener { group, checkedId, isChecked ->
             if (isChecked) {
-                // Premium positions require Plus
-                val isPremiumPosition = checkedId == R.id.btn_position_left ||
-                        checkedId == R.id.btn_position_top ||
-                        checkedId == R.id.btn_position_bottom
-
-                /*
-                if (isPremiumPosition && !PlusStatusManager.isPlus.value && !DemoModeManager.isInDemoMode) {
-                    // Block this listener temporarily to avoid recursion
-                    group.removeOnButtonCheckedListener(positionButtonListener)
-
-                    // Force check the RIGHT position button
-                    group.clearChecked() // First clear all
-                    group.check(R.id.btn_position_right)
-
-                    // Re-add the listener
-                    group.addOnButtonCheckedListener(positionButtonListener)
-
-                    // Show upgrade screen
-                    Intent(this@QuickBarEditorActivity, UpgradeActivity::class.java).also {
-                        startActivity(it)
-                    }
-
-                    // Make sure our model is updated to RIGHT
-                    currentQuickBar?.position = QuickBarPosition.RIGHT
-                    updateGridLayoutVisibility()
-                    return@OnButtonCheckedListener
-                }
-                */
-
                 currentQuickBar?.position = when (checkedId) {
                     R.id.btn_position_right -> QuickBarPosition.RIGHT
                     R.id.btn_position_left -> QuickBarPosition.LEFT
@@ -335,19 +304,6 @@ class QuickBarEditorActivity : BaseActivity() {
         positionToggleGroup.addOnButtonCheckedListener(positionButtonListener)
 
         gridLayoutSwitch.setOnCheckedChangeListener { _, isChecked ->
-            /*
-            if (isChecked && !PlusStatusManager.isPlus.value && !DemoModeManager.isInDemoMode) {
-                // Reset switch to off position
-                gridLayoutSwitch.isChecked = false
-
-                // Show upgrade screen
-                Intent(this, UpgradeActivity::class.java).also {
-                    startActivity(it)
-                }
-                return@setOnCheckedChangeListener
-            }
-            */
-
             currentQuickBar?.useGridLayout = isChecked
         }
 
@@ -366,15 +322,6 @@ class QuickBarEditorActivity : BaseActivity() {
         }
 
         setTriggerButton.setOnClickListener {
-            // If this is a new QuickBar and there are already trigger keys defined
-            if (isNewBar && triggerKeyManager.loadTriggerKeys().size >= 1 && !PlusStatusManager.isPlus.value && !DemoModeManager.isInDemoMode) {
-                // User has reached the free limit, show upgrade screen
-                Intent(this, UpgradeActivity::class.java).also {
-                    startActivity(it)
-                }
-                return@setOnClickListener
-            }
-
             listenForTriggerKey()
         }
         selectEntitiesButton.setOnClickListener { launchEntitySelector() }

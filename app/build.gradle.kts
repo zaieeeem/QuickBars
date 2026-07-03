@@ -23,7 +23,6 @@ android {
         val baseVersionName = "1.3.3"
         versionCode = (findProperty("ciVersionCode") as String?)?.toIntOrNull() ?: 25
         versionName = (findProperty("ciVersionName") as String?) ?: baseVersionName
-        buildConfigField("String", "REVENUECAT_API_KEY", findProperty("REVENUECAT_API_KEY") as String? ?: "\"\"")
     }
 
     signingConfigs {
@@ -117,8 +116,6 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
-
-    implementation("com.revenuecat.purchases:purchases:9.1.2")
 
     // Jetpack Compose Dependencies (Updated)
     implementation("androidx.compose.ui:ui")

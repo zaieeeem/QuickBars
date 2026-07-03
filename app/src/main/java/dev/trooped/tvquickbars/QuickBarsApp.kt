@@ -5,15 +5,10 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
-import com.revenuecat.purchases.CustomerInfo
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesConfiguration
-import com.revenuecat.purchases.interfaces.UpdatedCustomerInfoListener
 import dev.trooped.tvquickbars.persistence.AppPrefs
 import dev.trooped.tvquickbars.data.AppIdProvider
 import dev.trooped.tvquickbars.persistence.SecurePrefsManager
 import dev.trooped.tvquickbars.utils.DemoModeManager
-import dev.trooped.tvquickbars.utils.PlusStatusManager
 import dev.trooped.tvquickbars.utils.SecureStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +28,8 @@ class QuickBarsApp : Application(), Application.ActivityLifecycleCallbacks {
      * (excluding content providers) have been created.
      *
      * This implementation initializes the application singleton, sets up default preferences,
-     * warms up secure storage, and checks for demo mode activation. It also configures
-     * RevenueCat for subscription management and ensures a unique application ID is generated.
+     * warms up secure storage, and checks for demo mode activation. It also ensures a unique
+     * application ID is generated.
      */
     override fun onCreate() {
         super.onCreate()
@@ -55,15 +50,6 @@ class QuickBarsApp : Application(), Application.ActivityLifecycleCallbacks {
         //clearHaCredentials()
         //IntegrationPrefs.clearPairing(ctx = this)
 
-        Purchases.configure(
-            PurchasesConfiguration.Builder(this, BuildConfig.REVENUECAT_API_KEY).build()
-        )
-
-        Purchases.sharedInstance.updatedCustomerInfoListener =
-            UpdatedCustomerInfoListener { info: CustomerInfo ->
-                PlusStatusManager.update(info)
-            }
-
         AppIdProvider.ensure(applicationContext) // Create a QuickBars ID instance
     }
 
@@ -74,7 +60,6 @@ class QuickBarsApp : Application(), Application.ActivityLifecycleCallbacks {
     }
 
     override fun onTerminate() {
-        Purchases.sharedInstance.updatedCustomerInfoListener = null
         super.onTerminate()
     }
 

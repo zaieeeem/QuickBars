@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -55,10 +54,6 @@
             android:exported="false"
             android:theme="@style/Theme.HAQuickBars">
         </activity>
-        <activity
-            android:name=".ui.UpgradeActivity"
-            android:exported="false"
-            android:theme="@style/Theme.HAQuickBars" />
         <activity
             android:name="dev.trooped.tvquickbars.ui.ComposeMainActivity"
             android:exported="true"/>
