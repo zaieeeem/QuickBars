@@ -21,9 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.trooped.tvquickbars.data.QuickBar
 import dev.trooped.tvquickbars.persistence.QuickBarManager
 import dev.trooped.tvquickbars.ui.adapters.QuickBarListAdapter
-import dev.trooped.tvquickbars.utils.DemoModeManager
 import dev.trooped.tvquickbars.utils.PermissionUtils
-import dev.trooped.tvquickbars.utils.PlusStatusManager
 
 /**
  * QuickBarsListFragment
@@ -112,14 +110,6 @@ class QuickBarsListFragment : Fragment() {
         val fab = view.findViewById<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>(R.id.fab_add_quickbar)
         fab.setOnClickListener {
             refreshList()
-            // Check if user already has 1 QuickBar and is not Plus
-            if (quickBarsList.size >= 1 && !PlusStatusManager.isPlus.value && !DemoModeManager.isInDemoMode) {
-                // User has reached the free limit, show upgrade screen
-                Intent(requireContext(), UpgradeActivity::class.java).also {
-                    startActivity(it)
-                }
-                return@setOnClickListener
-            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 !PermissionUtils.canDrawOverlays(requireContext()) &&

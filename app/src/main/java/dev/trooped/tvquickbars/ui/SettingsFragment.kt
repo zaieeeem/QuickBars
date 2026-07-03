@@ -29,13 +29,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import dev.trooped.tvquickbars.data.AppIdProvider
-import com.revenuecat.purchases.CustomerInfo
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesError
-import com.revenuecat.purchases.interfaces.GetStoreProductsCallback
-import com.revenuecat.purchases.interfaces.PurchaseCallback
-import com.revenuecat.purchases.models.StoreProduct
-import com.revenuecat.purchases.models.StoreTransaction
 import dev.trooped.tvquickbars.data.CategoryItem
 import dev.trooped.tvquickbars.ha.ConnectionState
 import dev.trooped.tvquickbars.ha.HomeAssistantClient
@@ -46,7 +39,6 @@ import dev.trooped.tvquickbars.persistence.SecurePrefsManager
 import dev.trooped.tvquickbars.services.QuickBarService
 import dev.trooped.tvquickbars.utils.DemoModeManager
 import dev.trooped.tvquickbars.utils.PermissionUtils
-import dev.trooped.tvquickbars.utils.PlusStatusManager
 import dev.trooped.tvquickbars.utils.TokenTransferHelper
 import kotlinx.coroutines.launch
 
@@ -76,12 +68,6 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
     private var tokenValidationSource: String = ""
 
     private lateinit var backupButton: Button
-
-    private lateinit var plusStatusText: TextView
-    private lateinit var upgradeButton: Button
-    private lateinit var coffeeButton: Button
-    private lateinit var cookieButton: Button
-    private lateinit var cakeButton: Button
 
     private lateinit var exportBackupButton: Button
     private lateinit var restoreBackupButton: Button
@@ -123,25 +109,9 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
         val overlayContainer: View = view.findViewById(R.id.overlay_permission_container)
         val accessibilityContainer: View = view.findViewById(R.id.accessibility_permission_container)
 
-        plusStatusText = view.findViewById(R.id.tv_plus_status)
-        upgradeButton = view.findViewById(R.id.btn_upgrade_plus)
-        coffeeButton = view.findViewById(R.id.btn_coffee)
-        cookieButton = view.findViewById(R.id.btn_coffee_cookie)
-        cakeButton = view.findViewById(R.id.btn_coffee_cake)
-
         updateUrlButton.setOnClickListener { showUpdateDialog("url") }
         updateTokenButton.setOnClickListener { showTokenUpdateOptions() }
         testConnectionButton.setOnClickListener { testConnection() }
-
-        // Set up button click listeners
-        upgradeButton.setOnClickListener {
-            startActivity(Intent(requireContext(), UpgradeActivity::class.java))
-        }
-
-        // Set up coffee buttons
-        coffeeButton.setOnClickListener { purchaseDonation("donation_coffee") }
-        cookieButton.setOnClickListener { purchaseDonation("donation_cookie") }
-        cakeButton.setOnClickListener { purchaseDonation("donation_cake") }
 
         exportBackupButton = view.findViewById(R.id.btn_export_backup)
         restoreBackupButton = view.findViewById(R.id.btn_restore_backup)
@@ -157,13 +127,6 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
             val intent = Intent(requireContext(), BackupActivity::class.java)
             intent.putExtra("restore_mode", true)  // Use the parameter BackupActivity expects
             startActivity(intent)
-        }
-
-        // Observe the Plus status
-        viewLifecycleOwner.lifecycleScope.launch {
-            PlusStatusManager.isPlus.collect { isPlusActive ->
-                updatePlusUI(isPlusActive)
-            }
         }
 
         val rateAppButton: Button = view.findViewById(R.id.btn_rate_app)
@@ -301,20 +264,6 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
         aboutVersionTextView.text = formattedVersionString
     }
 
-    private fun updatePlusUI(isPlus: Boolean) {
-        if (isPlus) {
-            plusStatusText.text = "Premium features active"
-            upgradeButton.text = "Active"
-            upgradeButton.isEnabled = false
-            upgradeButton.alpha = 0.6f
-        } else {
-            plusStatusText.text = "Unlock premium features"
-            upgradeButton.text = "Upgrade"
-            upgradeButton.isEnabled = true
-            upgradeButton.alpha = 1f
-        }
-    }
-
     /**
      * Opens the app's Play Store page for rating and reviewing
      */
@@ -357,51 +306,6 @@ class SettingsFragment : Fragment(), HomeAssistantListener {
         Toast.makeText(ctx, "Couldn't open Google Play", Toast.LENGTH_SHORT).show()
     }
 
-
-    private fun purchaseDonation(productId: String) {
-        Purchases.sharedInstance.getProducts(
-            listOf(productId),
-            object : GetStoreProductsCallback {
-                override fun onReceived(storeProducts: List<StoreProduct>) {
-                    val product = storeProducts.firstOrNull()
-                    if (product != null) {
-                        Purchases.sharedInstance.purchaseProduct(
-                            requireActivity(),
-                            product,
-                            object : PurchaseCallback {
-                                override fun onCompleted(
-                                    storeTransaction: StoreTransaction,
-                                    customerInfo: CustomerInfo
-                                ) {
-                                    Toast.makeText(requireContext(), "Thank you for your support!", Toast.LENGTH_LONG).show()
-                                }
-
-                                override fun onError(error: PurchasesError, userCancelled: Boolean) {
-                                    if (!userCancelled) {
-                                        Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                        )
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "Donation product not available right now.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-
-                override fun onError(error: PurchasesError) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading product: ${error.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        )
-    }
 
     /**
      * Show options for updating the token.

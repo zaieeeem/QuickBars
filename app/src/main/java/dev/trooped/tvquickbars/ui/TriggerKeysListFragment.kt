@@ -24,9 +24,7 @@ import dev.trooped.tvquickbars.data.TriggerKey
 import dev.trooped.tvquickbars.persistence.TriggerKeyManager
 import dev.trooped.tvquickbars.services.QuickBarService
 import dev.trooped.tvquickbars.ui.adapters.TriggerKeyListAdapter
-import dev.trooped.tvquickbars.utils.DemoModeManager
 import dev.trooped.tvquickbars.utils.PermissionUtils
-import dev.trooped.tvquickbars.utils.PlusStatusManager
 import java.util.Locale
 
 
@@ -165,15 +163,6 @@ class TriggerKeysListFragment : Fragment() {
      * Listen for a trigger key to be pressed.
      */
     private fun listenForTriggerKey() {
-        // Check if user already has 1 trigger key and is not Plus
-        if (triggerKeysList.size >= 1 && !PlusStatusManager.isPlus.value && !DemoModeManager.isInDemoMode) {
-            // User has reached the free limit, show upgrade screen
-            Intent(requireContext(), UpgradeActivity::class.java).also {
-                startActivity(it)
-            }
-            return
-        }
-
         // Check accessibility permission before attempting to capture keys
         if (!PermissionUtils.isAccessibilityServiceEnabled(requireContext())) {
             PermissionUtils.showAccessibilityPermissionExplanation(
