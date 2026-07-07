@@ -174,7 +174,7 @@
                                 android:id="@+id/tv_persistent_conn_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Maintains a connection to your Home Assistant in the background and starts automatically after reboot. Shows a small persistent notification while active. You can turn this off anytime.\nEntities states update in the background, trigger QuickBars, cameras and notifications from HA, faster QuickBar load.\nWarning: may affect device performance, may not work on all devices"
+                                android:text="Maintains a connection to your Home Assistant in the background and starts automatically after reboot. Shows a small persistent notification while active. You can turn this off anytime.\nEntities states update in the background, trigger quick bars, cameras and notifications from HA, faster quick bar load.\nWarning: may affect device performance, may not work on all devices"
                                 android:textAppearance="?attr/textAppearanceBodySmall"
                                 android:textColor="?attr/colorOnSurfaceVariant"/>
                         </LinearLayout>
@@ -217,7 +217,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="QuickBars App ID"
+                                android:text="Bing-Bong App ID"
                                 android:textColor="@color/md_theme_onSurface"
                                 android:textAppearance="?attr/textAppearanceBodyMedium"/>
 
@@ -420,7 +420,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Back up your entities, QuickBars, and trigger keys"
+                                android:text="Back up your entities, quick bars, and trigger keys"
                                 android:textAppearance="?attr/textAppearanceBodySmall"
                                 android:textColor="?attr/colorOnSurfaceVariant"/>
                         </LinearLayout>

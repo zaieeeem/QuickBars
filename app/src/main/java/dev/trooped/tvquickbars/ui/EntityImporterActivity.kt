@@ -667,7 +667,7 @@ fun EntityImporterScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            "If you've used QuickBars before and have a recent backup, you can restore your Entities, QuickBars, and Trigger Keys.",
+                            "If you've used Bing-Bong before and have a recent backup, you can restore your Entities, quick bars, and Trigger Keys.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -722,7 +722,7 @@ fun EntityImporterScreen(
                     windowInsets = WindowInsets.statusBars,
                     title = {
                         Text(
-                            text = if (isFirstTimeSetup) "Welcome to QuickBars for HA" else "Import Entities",
+                            text = if (isFirstTimeSetup) "Welcome to Bing-Bong for HA" else "Import Entities",
                             style = MaterialTheme.typography.headlineMedium,
                             modifier = Modifier.padding(top = 26.dp)
                         )

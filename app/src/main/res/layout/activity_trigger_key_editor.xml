@@ -149,7 +149,7 @@
                             android:minHeight="40dp"
                             android:layout_weight="1"
                             android:textSize="12sp"
-                            android:text="QuickBar"/>
+                            android:text="Quick Bar"/>
 
                         <Button
                             android:id="@+id/btn_single_entity"
@@ -279,7 +279,7 @@
                             android:minHeight="40dp"
                             android:layout_weight="1"
                             android:textSize="12sp"
-                            android:text="QuickBar"/>
+                            android:text="Quick Bar"/>
 
                         <Button
                             android:id="@+id/btn_double_entity"
@@ -385,7 +385,7 @@
                             android:minHeight="40dp"
                             android:layout_weight="1"
                             android:textSize="12sp"
-                            android:text="QuickBar"/>
+                            android:text="Quick Bar"/>
 
                         <Button
                             android:id="@+id/btn_long_entity"

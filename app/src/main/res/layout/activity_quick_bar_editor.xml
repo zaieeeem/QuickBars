@@ -17,7 +17,7 @@
             android:layout_height="?attr/actionBarSize"
             app:titleTextColor="@color/md_theme_onSurface"
             app:navigationIconTint="@color/md_theme_onSurface"
-            app:title="QuickBar"
+            app:title="Quick Bar"
             app:titleCentered="true"
             app:navigationIcon="@drawable/ic_arrow_back" />
 
@@ -197,7 +197,7 @@
                         android:id="@+id/tv_no_triggers_message"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="This QuickBar doesn't have any triggers assigned."
+                        android:text="This quick bar doesn't have any triggers assigned."
                         android:textColor="@color/md_theme_onSurface"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:visibility="gone"/>
@@ -434,7 +434,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="2dp"
-                        android:text="Auto-close QuickBar"
+                        android:text="Auto-close Quick Bar"
                         android:textColor="@color/md_theme_onSurface"
                         android:textAppearance="?attr/textAppearanceBodyMedium"/>
 
@@ -443,7 +443,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="6dp"
-                        android:text="Choose how long before this QuickBar closes automatically after it's triggered."
+                        android:text="Choose how long before this quick bar closes automatically after it's triggered."
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:textAppearance="?attr/textAppearanceBodySmall"/>
 
@@ -514,9 +514,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:hint="Trigger QuickBar from Home Assistant with a custom Event"
+                        android:hint="Trigger quick bar from Home Assistant with a custom Event"
                         app:helperTextTextAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                        app:helperText="Optional: Trigger this QuickBar from Home Assistant with quickbars.open event">
+                        app:helperText="Optional: Trigger this quick bar from Home Assistant with quickbars.open event">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_ha_trigger_alias"

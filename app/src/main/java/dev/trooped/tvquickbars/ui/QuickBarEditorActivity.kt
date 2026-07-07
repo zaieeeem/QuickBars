@@ -204,7 +204,7 @@ class QuickBarEditorActivity : BaseActivity() {
         if (quickBarId == null) {
             // This is a new QuickBar
             isNewBar = true
-            supportActionBar?.title = "Create QuickBar"
+            supportActionBar?.title = "Create Quick Bar"
             deleteButton.visibility = View.GONE
             currentQuickBar = QuickBar()
 
@@ -214,7 +214,7 @@ class QuickBarEditorActivity : BaseActivity() {
         } else {
             // We are editing an existing QuickBar. Find it in our saved list.
             isNewBar = false
-            supportActionBar?.title = "Edit QuickBar"
+            supportActionBar?.title = "Edit Quick Bar"
             deleteButton.visibility = View.VISIBLE
             val allBars = quickBarManager.loadQuickBars()
             currentQuickBar = allBars.find { it.id == quickBarId }
@@ -265,7 +265,7 @@ class QuickBarEditorActivity : BaseActivity() {
                         // Show the warning dialog
                         MaterialAlertDialogBuilder(this@QuickBarEditorActivity)
                             .setTitle("Background Connection Required")
-                            .setMessage("Please enable persistent background connection in settings to enable triggering QuickBars from Home Assistant.")
+                            .setMessage("Please enable persistent background connection in settings to enable triggering quick bars from Home Assistant.")
                             .setIcon(R.drawable.ic_permission_off)
                             .setNegativeButton("Okay", null)
                             .show()
@@ -340,9 +340,9 @@ class QuickBarEditorActivity : BaseActivity() {
 
         // Update hint text to reflect status
         if (!isBackgroundEnabled) {
-            haTriggerAliasLayout.helperText = "You must enable persistent background connection in settings to enable triggering QuickBars from Home Assistant"
+            haTriggerAliasLayout.helperText = "You must enable persistent background connection in settings to enable triggering quick bars from Home Assistant"
         } else {
-            haTriggerAliasLayout.helperText = "Optional: Trigger this QuickBar from Home Assistant with quickbars.open event with this alias"
+            haTriggerAliasLayout.helperText = "Optional: Trigger this quick bar from Home Assistant with quickbars.open event with this alias"
         }
     }
 
@@ -672,8 +672,8 @@ class QuickBarEditorActivity : BaseActivity() {
      */
     private fun showDeleteConfirmationDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle("Delete QuickBar")
-            .setMessage("This QuickBar will be permanently deleted.")
+            .setTitle("Delete Quick Bar")
+            .setMessage("This quick bar will be permanently deleted.")
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
@@ -918,13 +918,13 @@ class QuickBarEditorActivity : BaseActivity() {
         }
 
         if (name.length >= MAX_LEN_QUICKBAR_NAME) {
-            nameInputLayout.error = "QuickBar name cannot exceed $MAX_LEN_QUICKBAR_NAME characters."
+            nameInputLayout.error = "Quick bar name cannot exceed $MAX_LEN_QUICKBAR_NAME characters."
             nameInput.requestFocus()
             return
         }
 
         if (isNameAlreadyTaken(name)) {
-            nameInputLayout.error = "QuickBar name is already taken. Please choose another one."
+            nameInputLayout.error = "Quick bar name is already taken. Please choose another one."
             nameInput.requestFocus()
             return
         }
@@ -950,13 +950,13 @@ class QuickBarEditorActivity : BaseActivity() {
         }
 
         if (name.length >= MAX_LEN_QUICKBAR_NAME) {
-            nameInputLayout.error = "QuickBar name cannot exceed $MAX_LEN_QUICKBAR_NAME characters."
+            nameInputLayout.error = "Quick bar name cannot exceed $MAX_LEN_QUICKBAR_NAME characters."
             nameInput.requestFocus()
             return
         }
 
         if (isNameAlreadyTaken(name)) {
-            nameInputLayout.error = "QuickBar name is already taken. Please choose another one."
+            nameInputLayout.error = "Quick bar name is already taken. Please choose another one."
             nameInput.requestFocus()
             return
         }
@@ -1037,9 +1037,9 @@ class QuickBarEditorActivity : BaseActivity() {
                                 conflictName = conflictingActionId // Entity ID
                             }
                             "quickbar" -> {
-                                conflictTypeMessage = "a QuickBar"
+                                conflictTypeMessage = "a quick bar"
                                 conflictName = quickBarManager.loadQuickBars()
-                                    .find { it.id == conflictingActionId }?.name ?: "another QuickBar"
+                                    .find { it.id == conflictingActionId }?.name ?: "another quick bar"
                             }
                             "app" -> {
                                 conflictTypeMessage = "an app"
@@ -1093,7 +1093,7 @@ class QuickBarEditorActivity : BaseActivity() {
 
 
         // FINALIZE
-        Toast.makeText(this, "QuickBar Saved!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Quick bar saved!", Toast.LENGTH_SHORT).show()
 
         val reloadIntent = Intent(this, QuickBarService::class.java).apply {
             action = "ACTION_RELOAD_TRIGGER_KEYS"
@@ -1118,7 +1118,7 @@ class QuickBarEditorActivity : BaseActivity() {
         allBars.removeAll { it.id == barToDelete.id }
         quickBarManager.saveQuickBars(allBars)
 
-        Toast.makeText(this, "QuickBar Deleted", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Quick bar deleted", Toast.LENGTH_SHORT).show()
 
         // It's good practice to also reload triggers in the service after deletion
         val reloadIntent = Intent(this, QuickBarService::class.java).apply {
@@ -1182,7 +1182,7 @@ class QuickBarEditorActivity : BaseActivity() {
             // A conflict exists if an action is assigned AND it's not for the bar we are currently editing
             if (conflictingActionId != null && conflictingActionId != barId) {
                 // Create appropriate message based on action type
-                val conflictType = if (isEntityAction) "entity" else "QuickBar"
+                val conflictType = if (isEntityAction) "entity" else "quick bar"
                 val conflictName = if (isEntityAction) {
                     // For entity conflicts, show the entity ID
                     conflictingActionId

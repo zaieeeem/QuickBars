@@ -38,7 +38,7 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Home Assistant 2026.3 Compatibility",
-                    description = "Updated light entity controls to handle deprecated features introduced in HA 2026.3. QuickBars now uses kelvin-based values instead of mired-based values for better future-proofing."
+                    description = "Updated light entity controls to handle deprecated features introduced in HA 2026.3. Bing-Bong now uses kelvin-based values instead of mired-based values for better future-proofing."
                 ),
                 ChangeItem(
                     title = "Light temperature controls bug fix",
@@ -48,8 +48,8 @@ object AppUpdateManager {
 
             24 -> listOf(
                 ChangeItem(
-                    title = "Improved Auto-close Timer for QuickBars",
-                    description = "Now, the timer restarts whenever you click the DPAD keys (arrows or center_dpad/confirm key), while the QuickBar is open."
+                    title = "Improved Auto-close Timer for Quick Bars",
+                    description = "Now, the timer restarts whenever you click the DPAD keys (arrows or center_dpad/confirm key), while the quick bar is open."
                 ),
                 ChangeItem(
                     title = "Advanced RTSP Streams Configuration",
@@ -59,8 +59,8 @@ object AppUpdateManager {
 
             23 -> listOf(
                 ChangeItem(
-                    title = "Auto-close Timer for QuickBars",
-                    description = "You can now set an auto-close timer per QuickBar inside its settings. Choose between Never (default), 15s, 30s and 60s to automatically close the QuickBar after it’s opened."
+                    title = "Auto-close Timer for Quick Bars",
+                    description = "You can now set an auto-close timer per quick bar inside its settings. Choose between Never (default), 15s, 30s and 60s to automatically close the quick bar after it’s opened."
                 ),
                 ChangeItem(
                     title = "Updated camera_proxy Images in Notifications",
@@ -72,7 +72,7 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Global “Show Toast on Entity Triggers”",
-                    description = "New global setting in QuickBars Settings → Advanced Settings: disable all “X triggered” toasts for entities and camera PiP that are activated via Trigger Keys. Error toasts still appear when something goes wrong."
+                    description = "New global setting in Bing-Bong Settings → Advanced Settings: disable all “X triggered” toasts for entities and camera PiP that are activated via Trigger Keys. Error toasts still appear when something goes wrong."
                 )
             )
 
@@ -83,11 +83,11 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Camera PiP",
-                    description = "Open a camera by entity, QuickBars alias, or RTSP URL. Choose size mode: auto, preset (S/M/L), or custom {w,h}, and place it in any corner. Options include mute audio (RTSP only), auto-hide (0–300s, 0 = never), show/hide or customize the title, and show/hide the toast when toggled. You can also target a specific TV with App ID."
+                    description = "Open a camera by entity, quick bar alias, or RTSP URL. Choose size mode: auto, preset (S/M/L), or custom {w,h}, and place it in any corner. Options include mute audio (RTSP only), auto-hide (0–300s, 0 = never), show/hide or customize the title, and show/hide the toast when toggled. You can also target a specific TV with App ID."
                 ),
                 ChangeItem(
-                    title = "QuickBar Toggle",
-                    description = "Open/close a QuickBar by alias via event, now with optional App ID to target a specific TV."
+                    title = "Quick Bar Toggle",
+                    description = "Open/close a quick bar by alias via event, now with optional App ID to target a specific TV."
                 ),
                 ChangeItem(
                     title = "Onboarding & UI",
@@ -102,23 +102,23 @@ object AppUpdateManager {
             21 -> listOf(
                 ChangeItem(
                     title = "Performance & Stability",
-                    description = "Camera PiP now uses fewer resources and stutters less. QuickBar opens faster and entities populate sooner. Overlay show/hide was reworked to avoid background crashes (even while video apps are playing). General stability improvements across the app."
+                    description = "Camera PiP now uses fewer resources and stutters less. Quick bar opens faster and entities populate sooner. Overlay show/hide was reworked to avoid background crashes (even while video apps are playing). General stability improvements across the app."
                 ),
                 ChangeItem(
-                    title = "QuickBar & Camera PiP",
-                    description = "Home Assistant 'quickbars.open' event now toggles the QuickBar when it’s already open (same behavior as Camera PiP). Triggering a second Camera PiP in a different corner now switches to the correct stream."
+                    title = "Quick Bar & Camera PiP",
+                    description = "Home Assistant 'quickbars.open' event now toggles the quick bar when it’s already open (same behavior as Camera PiP). Triggering a second Camera PiP in a different corner now switches to the correct stream."
                 ),
                 ChangeItem(
                     title = "Home Assistant Integration",
-                    description = "Fixed an issue where on some Android 11 devices a QuickBar could not be triggered via the Home Assistant event."
+                    description = "Fixed an issue where on some Android 11 devices a quick bar could not be triggered via the Home Assistant event."
                 ),
                 ChangeItem(
                     title = "Input Handling",
-                    description = "Fixed cases where a long-press to trigger an action would also fire the button’s original action on release in certain apps/devices. Pressing BACK to close a QuickBar no longer sends BACK to the underlying app (e.g., Netflix/Plex). Potentially fixed DPAD_CENTER not working reliably with the accessibility service enabled (seen on older Sony Bravia). Potentially fixed cases where after closing a QuickBar with BACK, some keys (e.g., DPAD_DOWN) didn’t work until pressing BACK again."
+                    description = "Fixed cases where a long-press to trigger an action would also fire the button’s original action on release in certain apps/devices. Pressing BACK to close a quick bar no longer sends BACK to the underlying app (e.g., Netflix/Plex). Potentially fixed DPAD_CENTER not working reliably with the accessibility service enabled (seen on older Sony Bravia). Potentially fixed cases where after closing a quick bar with BACK, some keys (e.g., DPAD_DOWN) didn’t work until pressing BACK again."
                 ),
                 ChangeItem(
                     title = "Bug Fixes",
-                    description = "Various reliability fixes around overlays and focus. Overall smoother behavior when showing Camera PiP and QuickBar simultaneously."
+                    description = "Various reliability fixes around overlays and focus. Overall smoother behavior when showing Camera PiP and quick bar simultaneously."
                 )
             )
 
@@ -126,7 +126,7 @@ object AppUpdateManager {
             20 -> listOf(
                 ChangeItem(
                     title = "Performance & Stability",
-                    description = "QuickBar opens a bit faster. Reworked show/hide logic for QuickBar & Camera PiP to reduce jank and avoid background crashes. Improved cold-start reliability on slower devices. Improved general stability and performance in many other places."
+                    description = "Quick bar opens a bit faster. Reworked show/hide logic for quick bar & Camera PiP to reduce jank and avoid background crashes. Improved cold-start reliability on slower devices. Improved general stability and performance in many other places."
                 ),
                 ChangeItem(
                     title = "Network & Setup",
@@ -142,14 +142,14 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Bug Fixes",
-                    description = "Fixed crash when launching an app shortcut if its activity isn’t available. Fixed a case where a long-press QuickBar would close immediately and also trigger the failsafe. Fixed bug where MJPEG streams won't load on some cameras. Fixed bug with focus for Entity's name change / camera alias."
+                    description = "Fixed crash when launching an app shortcut if its activity isn’t available. Fixed a case where a long-press quick bar would close immediately and also trigger the failsafe. Fixed bug where MJPEG streams won't load on some cameras. Fixed bug with focus for Entity's name change / camera alias."
                 )
             )
 
             19 -> listOf(
                 ChangeItem(
                     title = "Performance & Stability",
-                    description = "QuickBar opens a bit faster. Reworked show/hide logic for QuickBar & Camera PiP to reduce jank and avoid background crashes. Improved cold-start reliability on slower devices. Improved general stability and performance in many other places."
+                    description = "Quick bar opens a bit faster. Reworked show/hide logic for quick bar & Camera PiP to reduce jank and avoid background crashes. Improved cold-start reliability on slower devices. Improved general stability and performance in many other places."
                 ),
                 ChangeItem(
                     title = "Network & Setup",
@@ -165,14 +165,14 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Bug Fixes",
-                    description = "Fixed crash when launching an app shortcut if its activity isn’t available. Fixed a case where a long-press QuickBar would close immediately and also trigger the failsafe."
+                    description = "Fixed crash when launching an app shortcut if its activity isn’t available. Fixed a case where a long-press quick bar would close immediately and also trigger the failsafe."
                 )
             )
 
             18 -> listOf(
                 ChangeItem(
                     title = "Bug Fixes",
-                    description = "Fixed a rare crash where the Accessibility Service could stop when starting the QuickBar or PiP overlay, also - fixed a bug where the \"+\" button inside Climate and Light cards in vertical grid view could appear squished, and fixed an issue where light entities didn’t behave correctly (on/off lights appeared as expandable and lights with extra capabilities lacked their extra options in settings); if lights still aren’t fixed, try deleting and re-importing them, and if the problem persists please contact me."
+                    description = "Fixed a rare crash where the Accessibility Service could stop when starting the quick bar or PiP overlay, also - fixed a bug where the \"+\" button inside Climate and Light cards in vertical grid view could appear squished, and fixed an issue where light entities didn’t behave correctly (on/off lights appeared as expandable and lights with extra capabilities lacked their extra options in settings); if lights still aren’t fixed, try deleting and re-importing them, and if the problem persists please contact me."
                 )
             )
 
@@ -184,7 +184,7 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Trigger Key Overhaul",
-                    description = "Control locks, covers, climate, and fans directly. A single press on the same key now closes the QuickBar. Long press actions fire instantly (without lifting finger), and a 5-second hold disables Trigger Key remapping as a failsafe.",
+                    description = "Control locks, covers, climate, and fans directly. A single press on the same key now closes the quick bar. Long press actions fire instantly (without lifting finger), and a 5-second hold disables Trigger Key remapping as a failsafe.",
                 ),
                 ChangeItem(
                     title = "UI & Quality of Life",
@@ -192,7 +192,7 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "Bug Fixes",
-                    description = "Scenes now trigger correctly in grid QuickBars. Fixed crashes when setting entity actions and focus problems when editing entity names/ camera alias. Improved action reliability with Background Connection enabled. Addressed bugs with light brightness values (254 as 100%), and allowing http/https in manual setup."
+                    description = "Scenes now trigger correctly in grid quick bars. Fixed crashes when setting entity actions and focus problems when editing entity names/ camera alias. Improved action reliability with Background Connection enabled. Addressed bugs with light brightness values (254 as 100%), and allowing http/https in manual setup."
                 )
             )
 
@@ -201,19 +201,19 @@ object AppUpdateManager {
             15 -> listOf(
                 ChangeItem(
                     title = "Background Connection (Experimental)",
-                    description = "Optional persistent WebSocket to Home Assistant for live state updates, faster QuickBar loading, and letting HA automations trigger a QuickBar or open Camera PIP. May be limited by some Android TV OEMs; toggle in Settings.",
+                    description = "Optional persistent WebSocket to Home Assistant for live state updates, faster quick bar loading, and letting HA automations trigger a quick bar or open Camera PIP. May be limited by some Android TV OEMs; toggle in Settings.",
                 ),
                 ChangeItem(
                     title = "Camera PIP",
-                    description = "Add MJPEG camera entities as Picture-in-Picture. Choose corner, size (3 presets), auto-hide (15s/30s/1m/5m/never), and title display. Launch from QuickBar, Trigger Key, or HA event; press again to hide. One stream at a time.",
+                    description = "Add MJPEG camera entities as Picture-in-Picture. Choose corner, size (3 presets), auto-hide (15s/30s/1m/5m/never), and title display. Launch from quick bar, Trigger Key, or HA event; press again to hide. One stream at a time.",
                 ),
                 ChangeItem(
                     title = "Manual Backup & Restore (Experimental)",
-                    description = "Create/restore a single JSON file with QuickBars, Trigger Keys, and saved entities (no HA URL/token). Works across devices. Please report results.",
+                    description = "Create/restore a single JSON file with quick bars, Trigger Keys, and saved entities (no HA URL/token). Works across devices. Please report results.",
                 ),
                 ChangeItem(
-                    title = "QuickBar Options",
-                    description = "Show current time in the title row. Allow HA automation to trigger a QuickBar (requires Background Connection). Optional auto-close after actions for selected domains."
+                    title = "Quick Bar Options",
+                    description = "Show current time in the title row. Allow HA automation to trigger a quick bar (requires Background Connection). Optional auto-close after actions for selected domains."
                 ),
                 ChangeItem(
                     title = "Automation Entities",
@@ -221,7 +221,7 @@ object AppUpdateManager {
                 ),
                 ChangeItem(
                     title = "General Improvements",
-                    description = "Smoother light/climate controls. Clearer white focus border on QuickBar. Trigger Keys dialog warns against risky keys. Back press on main screen now shows a confirmation. Menus are more compact with better focus borders."
+                    description = "Smoother light/climate controls. Clearer white focus border on quick bar. Trigger Keys dialog warns against risky keys. Back press on main screen now shows a confirmation. Menus are more compact with better focus borders."
                 ),
                 ChangeItem(
                     title = "Bug Fixes",

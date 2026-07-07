@@ -146,7 +146,7 @@ class TriggerKeyListAdapter(
                 else -> {
                     // Default case - assume it's a QuickBar
                     val barName = quickBarMap[key.singlePressAction]?.name ?: key.singlePressAction
-                    assignments.append("$barName (QuickBar)")
+                    assignments.append("$barName (Quick Bar)")
                 }
             }
             assignments.append("\n")
@@ -183,7 +183,7 @@ class TriggerKeyListAdapter(
                 else -> {
                     // Default case - assume it's a QuickBar
                     val barName = quickBarMap[key.doublePressAction]?.name ?: key.doublePressAction
-                    assignments.append("$barName (QuickBar)")
+                    assignments.append("$barName (Quick Bar)")
                 }
             }
             assignments.append("\n")
@@ -220,7 +220,7 @@ class TriggerKeyListAdapter(
                 else -> {
                     // Default case - assume it's a QuickBar
                     val barName = quickBarMap[key.longPressAction]?.name ?: key.longPressAction
-                    assignments.append("$barName (QuickBar)")
+                    assignments.append("$barName (Quick Bar)")
                 }
             }
         }

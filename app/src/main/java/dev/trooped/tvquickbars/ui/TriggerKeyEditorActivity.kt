@@ -510,7 +510,7 @@ class TriggerKeyEditorActivity : BaseActivity() {
             val quickBars = quickBarManager.loadQuickBars()
             val spinnerItems = mutableListOf<ISpinnerItem>()
             // Add the placeholder "Select" item
-            spinnerItems.add(QuickBarSpinnerItem("select_quickbar", "Select QuickBar"))
+            spinnerItems.add(QuickBarSpinnerItem("select_quickbar", "Select Quick Bar"))
 
             quickBars.mapTo(spinnerItems) {
                 QuickBarSpinnerItem(id = it.id, displayText = it.name)
