@@ -278,7 +278,7 @@ sealed class NavItem(
 ) {
     object QuickBars : NavItem(
         R.id.nav_quickbars,
-        "QuickBars",
+        "Bing-Bong",
         R.drawable.ic_quickbars,
         { QuickBarsListFragment() }
     )
@@ -663,55 +663,7 @@ fun TVFriendlyNavigation(
                             }
                         }
 
-                        // Website section
                         Spacer(modifier = Modifier.weight(1f))
-
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                                .alpha(0.3f),
-                            thickness = DividerDefaults.Thickness, color = DividerDefaults.color
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 24.dp)
-                                .focusable(false)  // This whole section is not focusable
-                                .semantics(mergeDescendants = true) { disabled() },
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center // Center the QR and Text
-                        ) {
-                            // Your QR Code
-                            Image(
-                                painter = painterResource(id = R.drawable.website_qr_code), // <-- FIXED: Use painterResource
-                                contentDescription = "Scan to visit quickbars.app",
-                                modifier = Modifier
-                                    .size(60.dp) // Adjust size as needed
-                                    .clip(RoundedCornerShape(8.dp)), // Softens the edges
-                                contentScale = ContentScale.Fit
-                            )
-
-                            Spacer(Modifier.width(16.dp))
-
-                            // Text Column
-                            Column(
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    "More info & support",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    "quickbars.app",
-                                    style = MaterialTheme.typography.bodySmall, // Smaller, subtle text
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                                Spacer(Modifier.height(8.dp))
-                            }
-                        }
                     }
                 }
             }

@@ -16,7 +16,7 @@
             android:layout_height="?attr/actionBarSize"
             app:titleTextColor="@color/md_theme_onSurface"
             app:navigationIconTint="@color/md_theme_onSurface"
-            app:title="Select Entities for Your QuickBar"
+            app:title="Select Entities for Your Quick Bar"
             app:titleCentered="true" />
 
     </com.google.android.material.appbar.AppBarLayout>

@@ -40,11 +40,11 @@
     <string name="permission_accessibility_explanation">To detect remote control buttons, please enable the Bing-Bong service in your system\'s Accessibility settings.</string>
     <string name="permission_button_open_accessibility">Open Accessibility Settings</string>
     <string name="permission_overlay_title">One Last Step!</string>
-    <string name="permission_overlay_explanation">To display the QuickBar over other apps, please grant the overlay permission.</string>
+    <string name="permission_overlay_explanation">To display the quick bar over other apps, please grant the overlay permission.</string>
     <string name="permission_button_grant_overlay">Grant Overlay Permission</string>
 
     <!-- QuickBar Editor -->
-    <string name="quickbar_name">QuickBar Name</string>
+    <string name="quickbar_name">Quick Bar Name</string>
     <string name="trigger">Trigger</string>
     <string name="quickbar_editor_button_set_trigger">Set Trigger Button</string>
     <string name="quickbar_editor_label_activation_method">Activation Method</string>
@@ -55,7 +55,7 @@
     <string name="select_entities">Select Entities</string>
     <string name="reorder_selected_entities">Reorder Selected Entities</string>
     <string name="quickbar_editor_section_style"><![CDATA[Style & Layout]]></string>
-    <string name="edit_quickbar_theme">Edit QuickBar Theme</string>
+    <string name="edit_quickbar_theme">Edit Quick Bar Theme</string>
     <string name="screen_position_quickbar">Screen Position</string>
     <string name="left">Left</string>
     <string name="bottom">Bottom</string>
@@ -63,7 +63,7 @@
     <string name="right">Right</string>
     <string name="options">Options</string>
     <string name="enabled">Enabled</string>
-    <string name="show_quickbar_name_in_quickbar">Show Name on QuickBar</string>
+    <string name="show_quickbar_name_in_quickbar">Show Name on Quick Bar</string>
 
 
     <!-- Common Actions & Dialogs -->
@@ -86,10 +86,10 @@
     <string name="entity_manage_list_empty">No saved entities found</string>
 
     <!-- QuickBars List Screen -->
-    <string name="quickbars_list_title">QuickBars</string>
-    <string name="quickbars_list_empty_message">No QuickBars created.\nPress the button below to add one.</string>
-    <string name="quickbars_list_button_new">New QuickBar</string>
-    <string name="edit_quickbar">Edit QuickBar</string>
+    <string name="quickbars_list_title">Bing-Bong</string>
+    <string name="quickbars_list_empty_message">No quick bars created.\nPress the button below to add one.</string>
+    <string name="quickbars_list_button_new">New Quick Bar</string>
+    <string name="edit_quickbar">Edit Quick Bar</string>
 
 
     <!-- Settings Screen -->
@@ -126,8 +126,8 @@
 
 
     <!-- Special Permissions Strings -->
-    <string name="overlay_permission_title">Enable QuickBar Overlay</string>
-    <string name="overlay_permission_explanation">To display your quick bars on top of other apps, Bing-Bong requires the \"Display over other apps\" permission in system settings.\n\nThis is a core feature of the app and is only used to display the QuickBar when you activate a trigger key.</string>
+    <string name="overlay_permission_title">Enable Quick Bar Overlay</string>
+    <string name="overlay_permission_explanation">To display your quick bars on top of other apps, Bing-Bong requires the \"Display over other apps\" permission in system settings.\n\nThis is a core feature of the app and is only used to display the quick bar when you activate a trigger key.</string>
     <string name="overlay_permission_denied_message">Quick bars won\'t appear over other apps</string>
     <string name="overlay_permission_reminder">\"Display over other apps\" permission is required to display quick bars</string>
     <string name="overlay_settings_toast">Find Bing-Bong in the list and enable it</string>
@@ -146,7 +146,7 @@
     <string name="accessibility_more_info_message"><b>What This Permission Allows Bing-Bong to Do:</b>
 \n\n• Listen for physical button presses from your remote control.
 \n• Let you assign a new remote button by capturing it in the trigger setup screen.
-\n• Activate your actions (like displaying a QuickBar or toggling a light) when a configured trigger is detected.
+\n• Activate your actions (like displaying a quick bar or toggling a light) when a configured trigger is detected.
 
 \n\n<b>What This Permission DOES NOT Allow (Your Privacy Guarantee):</b>
 \n\n• It <b>cannot</b> read any content on your screen (passwords, messages, etc.).
@@ -172,7 +172,7 @@
 
     Bing-Bong does not use the Accessibility Service to collect any user data, see your personal information, or read the content of your screen. It is used solely for the key press trigger feature.
 </string>
-    <string name="show_time_on_quickbar">Show time on QuickBar</string>
+    <string name="show_time_on_quickbar">Show time on Quick Bar</string>
     <string name="settings_button_manage_pairing">Manage HA Integration</string>
 
     <string name="settings_dialog_pairing_title">Home Assistant Pairing</string>
@@ -181,7 +181,7 @@
     Home Assistant\n
     • Name: %1$s\n
     • URL: %2$s\n\n
-    QuickBars Pairing\n
+    Bing-Bong Pairing\n
     • Integration ID: %4$s\n
     • Paired: %5$s\n
     • Connected now: %6$s

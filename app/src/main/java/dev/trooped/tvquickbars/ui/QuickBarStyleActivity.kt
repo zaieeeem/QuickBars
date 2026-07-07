@@ -211,7 +211,7 @@ fun QuickBarStyleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("QuickBar Style") },
+                title = { Text("Quick Bar Style") },
                 navigationIcon = {
                     IconButton(
                         onClick = onCancel,
@@ -579,7 +579,7 @@ fun LiveQuickBarPreview(
     // Key change: Add the style parameters as keys to remember() so it updates when they change
     val previewQuickBar = remember(backgroundColor, backgroundOpacity, onStateColor, customBgRgb, customOnRgb) {
         QuickBar().apply {
-            this.name = "Preview QuickBar"
+            this.name = "Preview"
             this.backgroundColor = backgroundColor
             this.backgroundOpacity = backgroundOpacity
             this.onStateColor = onStateColor

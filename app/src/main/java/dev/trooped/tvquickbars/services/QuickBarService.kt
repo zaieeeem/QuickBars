@@ -1005,7 +1005,7 @@ class QuickBarService : AccessibilityService(), HomeAssistantListener {
                 if (bar.isEnabled) {
                     triggerQuickBar(bar)
                 } else {
-                    showToast("QuickBar '${bar.name}' is disabled")
+                    showToast("Quick bar '${bar.name}' is disabled")
                 }
             }
         }

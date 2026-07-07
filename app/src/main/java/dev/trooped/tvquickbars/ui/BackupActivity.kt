@@ -376,10 +376,10 @@ class BackupActivity : BaseActivity() {
                                 checked = includeQuickBars,
                                 onCheckedChange = { includeQuickBars = it })
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("QuickBars", style = MaterialTheme.typography.bodyLarge)
+                                Text("Quick Bars", style = MaterialTheme.typography.bodyLarge)
                                 if (mode == Mode.BACKUP) {
                                     Text(
-                                        "$quickBarCount ${if (quickBarCount == 1) "QuickBar" else "QuickBars"} available",
+                                        "$quickBarCount ${if (quickBarCount == 1) "quick bar" else "quick bars"} available",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -424,7 +424,7 @@ class BackupActivity : BaseActivity() {
                             Spacer(modifier = Modifier.height(8.dp))
                             if (includeQuickBars && !includeEntities) {
                                 Text(
-                                    "• QuickBars reference entities. Without entities, restored QuickBars may be empty.",
+                                    "• Quick bars reference entities. Without entities, restored quick bars may be empty.",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -438,7 +438,7 @@ class BackupActivity : BaseActivity() {
                             }
                             if (includeTriggerKeys && !includeQuickBars) {
                                 Text(
-                                    "• Trigger keys may open QuickBars. Without QuickBars, these keys won't function properly.",
+                                    "• Trigger keys may open quick bars. Without quick bars, these keys won't function properly.",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }

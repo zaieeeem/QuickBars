@@ -142,7 +142,7 @@ class ReorderEntitiesActivity : BaseActivity() {
             recyclerView.visibility = View.GONE
             emptyView.visibility = View.VISIBLE
             instructionsView.visibility = View.GONE
-            emptyView.text = "No entities selected for this QuickBar"
+            emptyView.text = "No entities selected for this quick bar"
             return
         }
 

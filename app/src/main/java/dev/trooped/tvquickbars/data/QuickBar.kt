@@ -40,7 +40,7 @@ enum class QuickBarPosition {
 data class QuickBar(
     // A unique ID so we can identify and edit each bar.
     @SerializedName("id") val id: String = UUID.randomUUID().toString(),
-    @SerializedName("name") var name: String = "New QuickBar",
+    @SerializedName("name") var name: String = "New Quick Bar",
 
     @SerializedName("backgroundColor") var backgroundColor: String = "colorSurface",
     @SerializedName("backgroundOpacity") var backgroundOpacity: Int = 90,

@@ -48,7 +48,7 @@ object EntityUsageUtils {
 
         // Add QuickBars information if any
         if (quickBarNames.isNotEmpty()) {
-            messageBuilder.append("\n\nThis entity is used in the following QuickBars:")
+            messageBuilder.append("\n\nThis entity is used in the following quick bars:")
             quickBarNames.forEachIndexed { index, name ->
                 if (index < 5) {
                     messageBuilder.append("\n• $name")
@@ -73,7 +73,7 @@ object EntityUsageUtils {
         }
 
         // Add the consequences
-        messageBuilder.append("\n\nThis entity will be removed from all QuickBars and Trigger Keys that use it.")
+        messageBuilder.append("\n\nThis entity will be removed from all quick bars and Trigger Keys that use it.")
 
         return messageBuilder.toString()
     }

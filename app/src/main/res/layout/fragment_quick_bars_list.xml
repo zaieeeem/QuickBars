@@ -68,7 +68,7 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:nextFocusDown="@id/fab_add_quickbar"
-                android:text="No QuickBars defined yet"
+                android:text="No quick bars defined yet"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:visibility="gone" />

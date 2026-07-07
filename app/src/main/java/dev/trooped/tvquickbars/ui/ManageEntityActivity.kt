@@ -959,7 +959,7 @@ fun ClickActionsCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Configure what happens when you interact with this entity in the QuickBar",
+                text = "Configure what happens when you interact with this entity in the quick bar",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp)
@@ -2286,7 +2286,7 @@ fun AutomationEntityOptions(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "This setting determines how this automation behaves whenever it's used - in QuickBars, trigger keys, or as actions for other entities.",
+            text = "This setting determines how this automation behaves whenever it's used - in quick bars, trigger keys, or as actions for other entities.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )
