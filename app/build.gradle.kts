@@ -18,12 +18,12 @@ android {
         // identity -- Play treats com.zaiemv.bingbong as a different app from
         // upstream's dev.trooped.tvquickbars, forever. Never change it again
         // after the first Play upload.
-        applicationId = "com.zaiemv.bingbong"
+        applicationId = "com.error314.bingbong"
         minSdk = 28
         targetSdk = 35
         // CI overrides these via -PciVersionCode / -PciVersionName when publishing
         // sideload releases; local builds keep the values below.
-        val baseVersionName = "1.3.3"
+        val baseVersionName = "1.3.4"
         versionCode = (findProperty("ciVersionCode") as String?)?.toIntOrNull() ?: 25
         versionName = (findProperty("ciVersionName") as String?) ?: baseVersionName
     }
