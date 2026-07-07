@@ -124,7 +124,7 @@ class EntityImporterActivity : BaseActivity(), HomeAssistantListener {
                         surfaceTint = colorResource(id = R.color.md_theme_primary)
                     )
                 ){
-                    EntityImporterScreen(
+                    EntityPickerScreen(
                         viewModel          = viewModel,
                         onNavigateToMain   = {
                             AppPrefs.setFirstTimeSetupInProgress(this, false)

@@ -3,31 +3,32 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-  <group android:scaleX="0.72" android:scaleY="0.72"
-      android:translateX="19.44" android:translateY="25.48">
-    <path
-        android:pathData="M22 57 A26 26 0 0 1 74 57 Z"
-        android:fillColor="#FFB74D"/>
-    <path
-        android:pathData="M45 27 h6 v8 h-6 Z"
-        android:fillColor="#FFB74D"/>
-    <path
-        android:pathData="M48 20 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0"
-        android:fillColor="#FFB74D"/>
-    <path
-        android:pathData="M17 62 h62 a4.5 4.5 0 0 1 0 9 h-62 a4.5 4.5 0 0 1 0 -9 Z"
-        android:fillColor="#FFD9A0"/>
-    <path
-        android:pathData="M30 8 A34 34 0 0 0 14 25"
-        android:fillColor="#00000000"
-        android:strokeColor="#FFD9A0"
-        android:strokeWidth="6"
-        android:strokeLineCap="round"/>
-    <path
-        android:pathData="M66 8 A34 34 0 0 1 82 25"
-        android:fillColor="#00000000"
-        android:strokeColor="#FFD9A0"
-        android:strokeWidth="6"
-        android:strokeLineCap="round"/>
-  </group>
+    <!-- Hotel desk bell, scaled into the adaptive-icon safe zone. -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.8"
+        android:scaleY="0.8">
+        <!-- base plate (pill) -->
+        <path
+            android:pathData="M28.5,72 H79.5 A5.5,5.5 0 0 1 79.5,83 H28.5 A5.5,5.5 0 0 1 28.5,72 Z"
+            android:fillColor="#41C7FF"/>
+        <!-- dome -->
+        <path
+            android:pathData="M27,73 C27,47 39,36 54,36 C69,36 81,47 81,73 Z"
+            android:fillColor="#41C7FF"/>
+        <!-- soft highlight on the dome -->
+        <path
+            android:pathData="M33,73 C33,51 42,41 54,41 L54,73 Z"
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.18"/>
+        <!-- top button -->
+        <path
+            android:pathData="M48,28 A6,6 0 1 1 60,28 A6,6 0 1 1 48,28 Z"
+            android:fillColor="#BFEAFF"/>
+        <!-- stem -->
+        <path
+            android:pathData="M53,30 H55 A2,2 0 0 1 57,32 V36 A2,2 0 0 1 55,38 H53 A2,2 0 0 1 51,36 V32 A2,2 0 0 1 53,30 Z"
+            android:fillColor="#BFEAFF"/>
+    </group>
 </vector>
