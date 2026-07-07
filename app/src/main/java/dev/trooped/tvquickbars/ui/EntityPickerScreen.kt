@@ -409,7 +409,7 @@ private fun EntityCard(
             Alignment.Center,
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_check),
+                painter = painterResource(R.drawable.ic_check_circle),
                 contentDescription = if (selected) "Selected" else "Not selected",
                 tint = Color(0xFF0E1116),
                 modifier = Modifier.size(18.dp).scale(checkScale),
