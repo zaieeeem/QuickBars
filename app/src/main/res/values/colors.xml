@@ -8,8 +8,8 @@
 
 
 
-    <color name="md_theme_primary">#87D1EB</color>
-    <color name="md_theme_onPrimary">#003543</color>
+    <color name="md_theme_primary">#41C7FF</color>
+    <color name="md_theme_onPrimary">#04121A</color>
     <color name="md_theme_primaryContainer">#004E60</color>
     <color name="md_theme_onPrimaryContainer">#B5EBFF</color>
     <color name="md_theme_secondary">#B3CAD4</color>
@@ -38,7 +38,7 @@
     <color name="md_theme_inversePrimary">#04677E</color>
     <color name="md_theme_primaryFixed">#B5EBFF</color>
     <color name="md_theme_onPrimaryFixed">#001F28</color>
-    <color name="md_theme_primaryFixedDim">#87D1EB</color>
+    <color name="md_theme_primaryFixedDim">#41C7FF</color>
     <color name="md_theme_onPrimaryFixedVariant">#004E60</color>
     <color name="md_theme_secondaryFixed">#CFE6F0</color>
     <color name="md_theme_onSecondaryFixed">#071E26</color>
@@ -85,7 +85,7 @@
     <color name="md_theme_inversePrimary_mediumContrast">#004F61</color>
     <color name="md_theme_primaryFixed_mediumContrast">#B5EBFF</color>
     <color name="md_theme_onPrimaryFixed_mediumContrast">#00141A</color>
-    <color name="md_theme_primaryFixedDim_mediumContrast">#87D1EB</color>
+    <color name="md_theme_primaryFixedDim_mediumContrast">#41C7FF</color>
     <color name="md_theme_onPrimaryFixedVariant_mediumContrast">#003C4A</color>
     <color name="md_theme_secondaryFixed_mediumContrast">#CFE6F0</color>
     <color name="md_theme_onSecondaryFixed_mediumContrast">#00141A</color>
@@ -132,7 +132,7 @@
     <color name="md_theme_inversePrimary_highContrast">#004F61</color>
     <color name="md_theme_primaryFixed_highContrast">#B5EBFF</color>
     <color name="md_theme_onPrimaryFixed_highContrast">#000000</color>
-    <color name="md_theme_primaryFixedDim_highContrast">#87D1EB</color>
+    <color name="md_theme_primaryFixedDim_highContrast">#41C7FF</color>
     <color name="md_theme_onPrimaryFixedVariant_highContrast">#00141A</color>
     <color name="md_theme_secondaryFixed_highContrast">#CFE6F0</color>
     <color name="md_theme_onSecondaryFixed_highContrast">#000000</color>
