@@ -35,11 +35,27 @@ jobs:
           echo "name=${BASE}-r${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
           echo "code=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
 
+      - name: Decode upload keystore
+        id: keystore
+        env:
+          HA_QUICKBARS_KEYSTORE_BASE64: ${{ secrets.HA_QUICKBARS_KEYSTORE_BASE64 }}
+        run: |
+          # Real Play upload key comes from the repo secret. Fall back to the
+          # committed CI keystore only if the secret is absent (read via env so
+          # base64 content can't break the shell test).
+          if [ -n "$HA_QUICKBARS_KEYSTORE_BASE64" ]; then
+            echo "$HA_QUICKBARS_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/bingbong-upload.jks"
+            echo "file=$RUNNER_TEMP/bingbong-upload.jks" >> "$GITHUB_OUTPUT"
+          else
+            echo "file=$GITHUB_WORKSPACE/.ci/quickbars-ci.jks" >> "$GITHUB_OUTPUT"
+            echo "::warning::HA_QUICKBARS_KEYSTORE_BASE64 not set — falling back to the committed CI keystore."
+          fi
+
       - name: Build signed release APK + AAB
         env:
-          # Defaults match the committed CI keystore; define repository secrets
-          # with the same names to switch to a private keystore. This keystore
-          # is the Play UPLOAD key — CI must keep using it for every release.
+          # Upload key + passwords/alias come from repo secrets (set by the
+          # uploader). The committed CI keystore is only a fallback if the
+          # base64 secret is missing.
           HA_QUICKBARS_KEYSTORE_PASSWORD: ${{ secrets.HA_QUICKBARS_KEYSTORE_PASSWORD || 'quickbars-ci' }}
           HA_QUICKBARS_KEY_ALIAS: ${{ secrets.HA_QUICKBARS_KEY_ALIAS || 'quickbars-ci' }}
           HA_QUICKBARS_KEY_PASSWORD: ${{ secrets.HA_QUICKBARS_KEY_PASSWORD || 'quickbars-ci' }}
@@ -48,7 +64,11 @@ jobs:
           ./gradlew assembleRelease bundleRelease \
             -PciVersionCode=${{ steps.version.outputs.code }} \
             -PciVersionName=${{ steps.version.outputs.name }} \
-            -PHA_QUICKBARS_KEYSTORE_FILE="$GITHUB_WORKSPACE/.ci/quickbars-ci.jks"
+            -PHA_QUICKBARS_KEYSTORE_FILE="${{ steps.keystore.outputs.file }}"
+
+      - name: Remove decoded keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/bingbong-upload.jks"
 
       - name: Rename artifacts
         run: |
@@ -64,3 +84,28 @@ jobs:
           files: |
             BingBong-*.apk
             BingBong-*.aab
+
+      # --- Ship to Google Play (Internal testing) -------------------------------
+      # Fires only when PLAY_SERVICE_ACCOUNT_JSON is set. Read via env so the JSON's
+      # embedded quotes don't break the shell presence test.
+      - name: Check for Play service account
+        id: playsa
+        env:
+          PLAY_SA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$PLAY_SA" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON not set — skipping Play upload (AAB on the GH release only)."
+          fi
+
+      - name: Upload AAB to Google Play (internal track)
+        if: ${{ steps.playsa.outputs.present == 'true' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.error314.bingbong
+          releaseFiles: BingBong-${{ steps.version.outputs.name }}.aab
+          track: internal
+          status: completed
