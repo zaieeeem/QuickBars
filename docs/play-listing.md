@@ -79,8 +79,8 @@ in `feature-graphic` and `tv-banner` is kept in the safe centre.
 > PRIVATE BY DESIGN
 > Bing-Bong connects directly to your own Home Assistant on your local network. No account to create, no cloud, no tracking, no data collection. Your access token is stored encrypted on your device.
 >
-> FREE AND OPEN SOURCE
-> Bing-Bong is completely free — no ads, no in-app purchases, no subscriptions. It's released under the GPL-3.0 licence and is based on QuickBars by Omri Peretz. Full source code: github.com/zaieeeem/QuickBars
+> COMPLETELY FREE
+> Bing-Bong is completely free — no ads, no in-app purchases, no subscriptions. It's released under the GPL-3.0 licence and is based on QuickBars by Omri Peretz.
 >
 > Not set up yet? Bing-Bong includes a built-in demo mode so you can explore a sample home before connecting your own.
 >
@@ -178,6 +178,14 @@ Back. Never used for ads, phishing, or obscuring other apps' UI. Without
 9. [ ] Roll out to internal testing, then promote to production when ready.
 
 ## Known follow-up (not blocking artwork, flag for a code PR)
+
+**GPL-3.0 source availability (OWNER DECISION before production publish):** the app is a
+GPL-3.0 derivative of QuickBars (Omri Peretz) distributed via Play. GPL-3.0 requires the
+corresponding source to be available to recipients; the fork repo is currently PRIVATE, so
+the listing copy no longer links it ("open source" claim and dead link removed 2026-07-07).
+Options for the owner: publish the repo (conflicts with the current nothing-goes-public
+stance — explicit owner call), publish a source tarball elsewhere, or take a written
+offer-of-source approach. Decide before the production push.
 
 Some **in-app strings still read "QuickBars"** rather than "Bing-Bong" — verified live on
 v1.3.3-r5: the main hub title ("QuickBars"), the entity-import header ("Welcome to
