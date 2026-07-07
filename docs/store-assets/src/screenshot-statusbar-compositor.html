@@ -1,0 +1,28 @@
+<style>
+  html,body{margin:0;padding:0;background:#000}
+  #c{display:block}
+</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+  function q(k,d){const m=new URLSearchParams(location.search);return m.has(k)?m.get(k):d;}
+  const img = q('img','');
+  const band = parseInt(q('h','60'),10);
+  const lc = '#'+q('lc','0d0d0d');
+  const rc = '#'+q('rc', q('lc','0d0d0d'));
+  const split = parseInt(q('split','0'),10);
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const im = new Image();
+  im.onload = () => {
+    ctx.drawImage(im,0,0,1920,1080);
+    // cover the phone status bar with matching background
+    ctx.fillStyle = lc;
+    ctx.fillRect(0,0, split>0?split:1920, band);
+    if (split>0){ ctx.fillStyle = rc; ctx.fillRect(split,0,1920-split,band); }
+    // optional bottom band to cover the gesture nav pill
+    const bh = parseInt(q('bh','0'),10);
+    if (bh>0){ ctx.fillStyle = '#'+q('bc','000000'); ctx.fillRect(0,1080-bh,1920,bh); }
+    document.title = 'READY';
+  };
+  im.src = img;
+</script>
