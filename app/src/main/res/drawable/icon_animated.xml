@@ -2,20 +2,20 @@
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:drawable="@drawable/icon_svg">
 
-    <!-- Vertical bar group goes UP -->
-    <target android:name="verticalBarGroup" android:animation="@animator/avd_bar_up_in"/>
-    <target android:name="verticalBarGroup" android:animation="@animator/avd_bar_up_settle1"/>
-    <target android:name="verticalBarGroup" android:animation="@animator/avd_bar_up_settle2"/>
+    <!-- Bell dome (hero): rises from below, then a small settle bounce (translateY). -->
+    <target android:name="bellDomeGroup" android:animation="@animator/avd_bar_up_in"/>
+    <target android:name="bellDomeGroup" android:animation="@animator/avd_bar_up_settle1"/>
+    <target android:name="bellDomeGroup" android:animation="@animator/avd_bar_up_settle2"/>
 
-    <!-- Seam fades in as bar reaches the house -->
-    <target android:name="verticalbarshadow" android:animation="@animator/avd_seam_alpha"/>
+    <!-- Clapper: swings in from the left onto the stem (translateX). -->
+    <target android:name="clapperGroup" android:animation="@animator/avd_eq_top_in_left"/>
 
-    <!-- Top pill: from LEFT + subtle fade -->
-    <target android:name="horizontalbarTopGroup" android:animation="@animator/avd_eq_top_in_left"/>
-    <target android:name="horizontalbarTopGroup" android:animation="@animator/avd_eq_top_fade"/>
+    <!-- Base pill: slides under from the right (group translateX) and its fill materialises (path fillAlpha). -->
+    <target android:name="basePillGroup" android:animation="@animator/avd_eq_bottom_in_right"/>
+    <target android:name="basePillPath" android:animation="@animator/avd_seam_alpha"/>
 
-    <!-- Bottom pill: from RIGHT + subtle fade -->
-    <target android:name="horizontalbarBottomGroup" android:animation="@animator/avd_eq_bottom_in_right"/>
-    <target android:name="horizontalbarBottomGroup" android:animation="@animator/avd_eq_bottom_fade"/>
+    <!-- Sound arcs ring out last (strokeAlpha): left ("bing") then right ("bong"). -->
+    <target android:name="leftArcPath" android:animation="@animator/avd_eq_top_fade"/>
+    <target android:name="rightArcPath" android:animation="@animator/avd_eq_bottom_fade"/>
 
 </animated-vector>
