@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Right sound arc rings out ("bong"), just after the left one: stroked path -> strokeAlpha. -->
 <objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:propertyName="alpha"
+    android:propertyName="strokeAlpha"
     android:valueFrom="0.0"
     android:valueTo="1.0"
-    android:startOffset="620"
-    android:duration="720"
+    android:startOffset="1950"
+    android:duration="410"
     android:valueType="floatType"/>

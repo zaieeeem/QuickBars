@@ -1,3 +1,6 @@
+import java.io.File
+import org.w3c.dom.Element
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -136,3 +139,75 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.8.0")
     implementation("androidx.media3:media3-ui-compose:1.8.0")
 }
+
+// ---------------------------------------------------------------------------
+// Regression guard for the splash AnimatedVectorDrawable.
+//
+// Every <target android:name="..."> in an animated-vector must resolve to an
+// element carrying that android:name in the vector it animates. When it does
+// not, AnimatedVectorDrawable.start() throws at runtime:
+//   IllegalStateException: Target with the name "..." cannot be found in the
+//   VectorDrawable to be animated
+// That exact crash shipped after the Bing-Bong rebrand replaced icon_svg.xml
+// (new logo, no named elements) while icon_animated.xml kept targeting the old
+// names. This task makes that class of breakage fail the build instead of only
+// crashing on device. It uses only the JDK XML parser -- no added dependency.
+// Wired into preBuild so it also runs in CI (assembleRelease).
+// ---------------------------------------------------------------------------
+val verifyAvdTargets by tasks.registering {
+    group = "verification"
+    description = "Fails if any animated-vector <target> name is absent from the vector it animates."
+    val resDir = layout.projectDirectory.dir("src/main/res")
+    inputs.dir(resDir)
+    doLast {
+        val ns = "http://schemas.android.com/apk/res/android"
+        val dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+        dbf.isNamespaceAware = true
+        val db = dbf.newDocumentBuilder()
+        val drawableDir = resDir.dir("drawable").asFile
+        val xmls = drawableDir.listFiles { f -> f.isFile && f.extension == "xml" }?.sorted() ?: emptyList()
+
+        val problems = mutableListOf<String>()
+        var avdCount = 0
+        for (avd in xmls) {
+            val avdRoot = db.parse(avd).documentElement
+            if (avdRoot.tagName != "animated-vector") continue
+            avdCount++
+
+            val drawableRef = avdRoot.getAttributeNS(ns, "drawable") // e.g. "@drawable/icon_svg"
+            val vectorName = drawableRef.substringAfterLast('/')
+            val vectorFile = File(drawableDir, "$vectorName.xml")
+            if (!vectorFile.exists()) {
+                problems += "${avd.name}: android:drawable=\"$drawableRef\" -> $vectorName.xml not found"
+                continue
+            }
+
+            val names = HashSet<String>()
+            val els = db.parse(vectorFile).getElementsByTagName("*")
+            for (i in 0 until els.length) {
+                val el = els.item(i) as org.w3c.dom.Element
+                val n = el.getAttributeNS(ns, "name")
+                if (n.isNotEmpty()) names += n
+            }
+
+            val targets = db.parse(avd).getElementsByTagName("target")
+            for (i in 0 until targets.length) {
+                val t = targets.item(i) as org.w3c.dom.Element
+                val tn = t.getAttributeNS(ns, "name")
+                if (tn.isNotEmpty() && tn !in names) {
+                    problems += "${avd.name}: <target name=\"$tn\"> has no element with that android:name in $vectorName.xml"
+                }
+            }
+        }
+
+        if (problems.isNotEmpty()) {
+            throw org.gradle.api.GradleException(
+                "verifyAvdTargets: AnimatedVectorDrawable target(s) do not resolve:\n  " +
+                    problems.joinToString("\n  ")
+            )
+        }
+        logger.lifecycle("verifyAvdTargets: OK ($avdCount animated-vector drawable(s) checked).")
+    }
+}
+
+tasks.named("preBuild") { dependsOn(verifyAvdTargets) }

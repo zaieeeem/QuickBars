@@ -3,31 +3,57 @@
     android:height="512dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
+  <!-- Outer normalizer: scales the ~74u artwork up into the 512 viewport.
+       Animated child groups translate in this scaled space (viewport ≈ 4.6 × value). -->
   <group android:scaleX="4.6" android:scaleY="4.6"
       android:translateX="35.20" android:translateY="67.40">
+
+    <!-- Bell dome: hero. Rises from below and settles with a small bounce (translateY). -->
+    <group android:name="bellDomeGroup"
+        android:translateX="0" android:translateY="0">
+      <path
+          android:pathData="M22 57 A26 26 0 0 1 74 57 Z"
+          android:fillColor="#FFB74D"/>
+    </group>
+
+    <!-- Clapper (stem + button): swings in from the left (translateX). -->
+    <group android:name="clapperGroup"
+        android:translateX="0" android:translateY="0">
+      <path
+          android:pathData="M45 27 h6 v8 h-6 Z"
+          android:fillColor="#FFB74D"/>
+      <path
+          android:pathData="M48 20 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0"
+          android:fillColor="#FFB74D"/>
+    </group>
+
+    <!-- Base pill: slides under from the right (group translateX) while its fill
+         materialises (path fillAlpha 0 -> 1). Starts invisible. -->
+    <group android:name="basePillGroup"
+        android:translateX="0" android:translateY="0">
+      <path
+          android:name="basePillPath"
+          android:pathData="M17 62 h62 a4.5 4.5 0 0 1 0 9 h-62 a4.5 4.5 0 0 1 0 -9 Z"
+          android:fillColor="#FFD9A0"
+          android:fillAlpha="0"/>
+    </group>
+
+    <!-- Sound arcs: ring out last (strokeAlpha 0 -> 1), left then right -> "bing / bong". -->
     <path
-        android:pathData="M22 57 A26 26 0 0 1 74 57 Z"
-        android:fillColor="#FFB74D"/>
-    <path
-        android:pathData="M45 27 h6 v8 h-6 Z"
-        android:fillColor="#FFB74D"/>
-    <path
-        android:pathData="M48 20 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0"
-        android:fillColor="#FFB74D"/>
-    <path
-        android:pathData="M17 62 h62 a4.5 4.5 0 0 1 0 9 h-62 a4.5 4.5 0 0 1 0 -9 Z"
-        android:fillColor="#FFD9A0"/>
-    <path
+        android:name="leftArcPath"
         android:pathData="M30 8 A34 34 0 0 0 14 25"
         android:fillColor="#00000000"
         android:strokeColor="#FFD9A0"
         android:strokeWidth="6"
-        android:strokeLineCap="round"/>
+        android:strokeLineCap="round"
+        android:strokeAlpha="0"/>
     <path
+        android:name="rightArcPath"
         android:pathData="M66 8 A34 34 0 0 1 82 25"
         android:fillColor="#00000000"
         android:strokeColor="#FFD9A0"
         android:strokeWidth="6"
-        android:strokeLineCap="round"/>
+        android:strokeLineCap="round"
+        android:strokeAlpha="0"/>
   </group>
 </vector>
