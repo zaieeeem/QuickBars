@@ -153,6 +153,15 @@ object EntityIconMapper {
     }
 
     /**
+     * Get the representative icon for a whole domain (e.g. for category headers).
+     * Reuses the per-entity default mapping so domain icons stay in one place.
+     */
+    @DrawableRes
+    fun getIconForDomain(domain: String): Int {
+        return getDefaultOnIconForEntity("${domain.lowercase()}.domain")
+    }
+
+    /**
      * Check if an entity is toggleable based on its domain
      */
     fun isEntityToggleable(entityId: String): Boolean {
